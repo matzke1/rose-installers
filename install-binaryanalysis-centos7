@@ -1,0 +1,84 @@
+#!/bin/bash
+########################################################################################################################
+# This script is able to install ROSE on a clean CentOS-7 machine, configuring ROSE for binary analysis
+# (--enable-languages=binaries) along with a number of software packages that increase the feature set of the binary
+# analysis.
+#
+# Prerequisite steps:
+#
+#  1. Create an AWS machine with a CentOS-7 AMI such as "CentOS 7 (x86_64) with Updates HVM". The machine should be
+#     large enough, such as m5.4xlarge (16 CPUs, 64 GiB RAM). Enlarge the root file system to be at least 40 GiB.
+#
+#  2. Log in as a normal (non-root) user and run this script.
+#
+# If this script fails part way through, it's often possible to make adjustments to the system and then re-run this
+# script after commenting out the steps at the end that have already been completed.
+#
+########################################################################################################################
+set -e
+arg0="${0##*/}"
+dir0="${0%/*}"
+
+. "${dir0}/impl/binaryanalysis-installation-support.sh"
+export PATH="$HOME/.spock/bin:$PATH"
+
+# These instructions come from https://rosecompiler.atlassian.net/wiki/x/vwBhF
+install-system-dependencies() {
+    ### WARNING: yum commands don't exit with non-zero status if they fail!!!!!!
+    sudo yum -y update
+ 
+    sudo yum -y install wget tar cmake java-1.8.0-openjdk-devel python-devel graphviz gcc-c++ flex bison \
+        bzip2 zlib-devel libtool libtool-ltdl-devel byacc libgcrypt-devel xz \
+        fuse fuse-devel passwd fontconfig mesa-libGLU git pcre-devel patch glibc-static libstdc++-static \
+        libstdc++-devel.i686 ncurses-devel.i686 sudo postgresql-devel ghostscript
+
+    while ! which scl; do
+	# Often fails the first time it runs, so just try a few times
+	sleep 5
+	sudo yum -y install centos-release-scl devtoolset-6
+    done
+    
+    sudo chmod 4755 /bin/fusermount # If you plan to build with Tup
+ 
+    # The following lines are needed for 7z if you're building binary releases of ROSE software
+    wget https://www.mirrorservice.org/sites/dl.fedoraproject.org/pub/epel/7/x86_64/Packages/p/p7zip-16.02-10.el7.x86_64.rpm
+    wget https://www.mirrorservice.org/sites/dl.fedoraproject.org/pub/epel/7/x86_64/Packages/p/p7zip-plugins-16.02-10.el7.x86_64.rpm
+    sudo rpm -U --quiet p7zip-16.02-10.el7.x86_64.rpm
+    sudo rpm -U --quiet p7zip-plugins-16.02-10.el7.x86_64.rpm
+    rm p7zip-16.02-10.el7.x86_64.rpm p7zip-plugins-16.02-10.el7.x86_64.rpm
+}
+
+# Some systems require extra commands to be run in each shell.
+# These instructions come from https://rosecompiler.atlassian.net/wiki/x/vwBhF
+run() {
+    (
+	set -x
+	scl enable devtoolset-6 -- "$@"
+    )
+}
+
+choose-rose-dependencies() {
+    rm -rf rose/_build
+    mkdir rose/_build
+    # system cmake is too old
+    # doxygen is missing libxapian-dev which seems to be unavailable on CentOS-7
+    # capstone is not needed but was enabled by default
+    # magic is not needed because it's not fully supported in Tup builds
+    # libpqxx is disabled because the library doesn't get inserted into the binary release (ROSE-2592)
+    (cd rose/_build && BUILD=tup CMAKE=3.13 DOXYGEN=none CAPSTONE=none MAGIC=none PQXX=none run rmc init --project=binaries --batch ..)
+}
+
+########################################################################################################################
+
+install-system-dependencies
+install-rmc-spock
+get-rose-source-code
+choose-rose-dependencies
+install-rose-dependencies
+create-automake-files
+configure-rose
+build-test-install-rose
+conditionally-install-megachiropteran
+conditionally-install-estcp
+build-binary-release
+compress-binary-release
