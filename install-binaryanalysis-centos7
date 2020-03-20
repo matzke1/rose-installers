@@ -9,7 +9,13 @@
 #  1. Create an AWS machine with a CentOS-7 AMI such as "CentOS 7 (x86_64) with Updates HVM". The machine should be
 #     large enough, such as m5.4xlarge (16 CPUs, 64 GiB RAM). Enlarge the root file system to be at least 40 GiB.
 #
-#  2. Log in as a normal (non-root) user and run this script.
+#  2. Log in as a normal (non-root) user
+#
+#  3. Run "sudo yum -y install git"
+#
+#  4. Run "git clone https://github.com/matzke1/rose-installers"
+#
+#  5. Run "./rose-installers/install-binaryanalysis-centos7"
 #
 # If this script fails part way through, it's often possible to make adjustments to the system and then re-run this
 # script after commenting out the steps at the end that have already been completed.
