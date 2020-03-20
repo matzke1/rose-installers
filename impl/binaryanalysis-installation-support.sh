@@ -4,6 +4,37 @@
 # implementations.
 ########################################################################################################################
 
+# Check that the hardware is capable of building all the software. These vary slightly according to the operating
+# system, so this function takes a couple optional arguments to specify the minimum disk size and minimum RAM size in
+# kB.  Note that the default minimums are larger than ROSE itself because the ROSE documentation doesn't consider the
+# space needed to install all the prerequisite software. Also, the necessary RAM will be higher than the default minimum
+# if the machine has more than one CPU.
+check-hardware-requirements() {
+    local min_disk_kb="$1" min_ram_kb="$2"
+    [ -n "$min_disk_kb" ] || min_disk_kb=32000000
+    [ -n "$min_ram_kb" ] || min_ram_kb=8000000
+
+    # Available disk space, typically including /tmp. However, if /tmp is mounted elsewhere then that filesystem
+    # should also be large.
+    for dir in . "${TMPDIR:-/tmp}"; do
+	local free_disk_kb=$(df "$dir" |sed -n '2,$ p' |tr -s ' \t' '\t' |cut -f4)
+	if [ -n "$free_disk_kb" ]; then
+	    if [ $free_disk_kb -lt $min_disk_kb ]; then
+		echo "$arg0: filesystem containing \"$dir\" is too small" >&2
+		exit 1
+	    fi
+	fi
+    done
+
+    local total_ram_kb=$(free |sed -n '/^Mem:/p' |tr -s ' \t' '\t' |cut -f2)
+    if [ -n "$total_ram_kb" ]; then
+	if [ $total_ram_kb -lt $min_ram_kb ]; then
+	    echo "$arg0: RAM size is too small" >&2
+	    exit 1
+	fi
+    fi
+}
+
 # Install basic operating-system comonents that are needed in order to build ROSE.  This will be different for
 # every platform. The list is maintained at https://rosecompiler.atlassian.net/wiki/x/vwBhF
 install-system-dependencies() {
