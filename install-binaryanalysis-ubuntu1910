@@ -52,6 +52,7 @@ choose-rose-dependencies() {
 
 ########################################################################################################################
 
+check-hardware-requirements 50000000
 install-system-dependencies
 install-rmc-spock
 get-rose-source-code
