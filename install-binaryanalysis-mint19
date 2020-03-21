@@ -1,0 +1,56 @@
+#!/bin/bash
+########################################################################################################################
+# This script is able to install ROSE on a clean Mint-19 machine, configuring ROSE for binary analysis
+# (--enable-languages=binaries) along with a number of software packages that increase the feature set of the binary
+# analysis.
+#
+# Prerequisite steps:
+#
+#  1. Create an AWS machine with an Mint-19 AMI such as "?FIXME?". The machine should be large enough, such as
+#     m5.4xlarge (16 CPUs, 64 GiB RAM). Enlarge the root file system to be at least 60 GiB.
+#
+#  2. Log in as a normal (non-root) user.
+#
+#  3. Run "git clone https://github.com/matzke1/rose-installers"
+#
+#  4. Run "./rose-installers/install-binaryanalysis-mint19"
+#
+# If this script fails part way through, it's often possible to make adjustments to the system and then re-run this
+# script after commenting out the steps at the end that have already been completed.
+#
+########################################################################################################################
+set -e
+arg0="${0##*/}"
+dir0="${0%/*}"
+
+. "${dir0}/impl/binaryanalysis-installation-support.sh"
+export PATH="$HOME/.spock/bin:$PATH"
+
+# These instructions come from https://rosecompiler.atlassian.net/wiki/x/vwBhF
+install-system-dependencies() {
+    sudo apt-get -y update
+    sudo apt-get -y install git wget build-essential g++ gfortran libtool automake flex bison \
+	libgraphviz-dev cmake libpqxx-dev ghostscript perl-doc groff libgcrypt20-dev \
+	libfcgi-dev libfuse-dev patchelf gcc-multilib g++-multilib gfortran-multilib \
+	fuse bsdmainutils libxapian-dev libltdl-dev
+
+    # If building ROSE graphical user interfaces that use Qt
+    sudo apt-get -y install qt5-default '^libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev \
+	 libxrender-dev libxi-dev libfontconfig1-dev libatspi2.0-dev libdbus-1-dev
+}
+
+########################################################################################################################
+
+check-hardware-requirements 50000000
+install-system-dependencies
+install-rmc-spock
+get-rose-source-code
+choose-rose-dependencies
+install-rose-dependencies
+create-automake-files
+configure-rose
+build-test-install-rose
+conditionally-install-megachiropteran
+conditionally-install-estcp
+build-binary-release
+compress-binary-release
