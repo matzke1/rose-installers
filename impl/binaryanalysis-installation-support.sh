@@ -85,6 +85,10 @@ create-automake-files() {
 
 # Configure ROSE by running, for instance, "configure".
 configure-rose() {
+    # These next two lines are just for debugging
+    run rmc -C rose/_build spock-using
+    run rmc -C rose/_build config --dry-run
+
     run rmc -C rose/_build config
     echo "CONFIG_TUP_ACKNOWLEDGMENT=yes" >> rose/_build/tup.config
 }
