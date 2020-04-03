@@ -39,3 +39,17 @@ Each of these scripts performs the following steps:
 * Prepares the binary release for distribution by compressing and
   encrypting it.
   
+# Test dates
+
+The following table describes when the most recent test was performed
+for each of the installer scripts.
+
+| Script                            |       Date |      ROSE | Megachiropteran | ESTCP | Result  |
+|-----------------------------------+------------+-----------+-----------------+-------+---------|
+| install-binaryanalysis-ubuntu1804 | 2020-04-03 | 0.10.0.28 | yes             | yes   | pass    |
+| install-binaryanalysis-ubuntu1910 | 2020-04-03 | 0.10.0.28 | yes             | yes   | pass    |
+| install-binaryanalysis-centos7    | 2020-04-03 | 0.10.0.28 | yes             | yes   | pass    |
+| install-binaryanalysis-centos6    | 2020-04-03 | 0.10.0.28 | yes             | yes   | pending |
+| install-binaryanalysis-mint18     | 2020-04-03 | 0.10.0.28 | yes             | yes   | pending |
+| install-binaryanalysis-mint19     | 2020-04-03 | 0.10.0.28 | ye              | yes   | pending |
+

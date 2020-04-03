@@ -35,7 +35,7 @@ install-system-dependencies() {
     sudo apt-get -y install git wget build-essential g++ gfortran libtool automake flex bison \
 	graphviz-dev cmake libpqxx-dev ghostscript perl-doc groff libgcrypt20-dev \
 	libfcgi-dev libfuse-dev patchelf gcc-multilib g++-multilib gfortran-multilib \
-	fuse bsdmainutils locales language-pack-en-base jq rsync libxapian-dev p7zip-full
+	fuse bsdmainutils locales language-pack-en-base jq rsync libxapian-dev 7zip-full
 
     # If building ROSE graphical user interfaces that use Qt
     sudo apt-get -y install qt5-default '^libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev \
