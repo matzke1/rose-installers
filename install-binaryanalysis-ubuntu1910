@@ -6,7 +6,7 @@
 #
 # Prerequisite steps:
 #
-#  1. Create an AWS machine with an Ubuntu-19.10 AMI such as "Minimal Ubuntu 19.10 - Eoan". The machine should be
+#  1. Create an AWS machine with an Ubuntu-19.10 AMI such as "Ubuntu 19.10 - Eoan". The machine should be
 #     large enough, such as m5.4xlarge (16 CPUs, 64 GiB RAM). Enlarge the root file system to be at least 60 GiB.
 #
 #  2. Log in as a normal (non-root) user.
@@ -34,7 +34,7 @@ install-system-dependencies() {
     sudo apt-get -y install git wget build-essential g++ gfortran libtool automake flex bison \
 	graphviz-dev cmake libpqxx-dev ghostscript perl-doc groff libgcrypt20-dev \
 	libfcgi-dev libfuse-dev patchelf gcc-multilib g++-multilib gfortran-multilib \
-	fuse bsdmainutils libxapian-dev
+	fuse bsdmainutils libxapian-dev p7zip-full
 
     # If building ROSE graphical user interfaces that use Qt
     sudo apt-get -y install qt5-default '^libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev \
@@ -45,8 +45,7 @@ install-system-dependencies() {
 choose-rose-dependencies() {
     rm -rf rose/_build
     mkdir rose/_build
-    # The default libgcrypt (1.7.x) is too old to compile with this system's default compiler.
-    (cd rose/_build && BUILD=tup GCRYPT=1.8 run rmc init --project=binaries --batch ..)
+    (cd rose/_build && BUILD=tup run rmc init --project=binaries --batch ..)
 }
 
 

@@ -7,7 +7,7 @@
 # Prerequisite steps:
 #
 #  1. Create an AWS machine with a CentOS-7 AMI such as "CentOS 7 (x86_64) with Updates HVM". The machine should be
-#     large enough, such as m5.4xlarge (16 CPUs, 64 GiB RAM). Enlarge the root file system to be at least 40 GiB.
+#     large enough, such as m5.4xlarge (16 CPUs, 64 GiB RAM). Enlarge the root file system to be at least 60 GiB.
 #
 #  2. Log in as a normal (non-root) user
 #
@@ -66,17 +66,15 @@ run() {
 choose-rose-dependencies() {
     rm -rf rose/_build
     mkdir rose/_build
-    # system cmake is too old
-    # doxygen is missing libxapian-dev which seems to be unavailable on CentOS-7
     # capstone is not needed but was enabled by default
     # magic is not needed because it's not fully supported in Tup builds
     # libpqxx is disabled because the library doesn't get inserted into the binary release (ROSE-2592)
-    (cd rose/_build && BUILD=tup CMAKE=3.13 DOXYGEN=none CAPSTONE=none MAGIC=none PQXX=none run rmc init --project=binaries --batch ..)
+    (cd rose/_build && BUILD=tup CAPSTONE=none MAGIC=none PQXX=none run rmc init --project=binaries --batch ..)
 }
 
 ########################################################################################################################
 
-check-hardware-requirements
+check-hardware-requirements 50000000
 install-system-dependencies
 install-rmc-spock
 get-rose-source-code

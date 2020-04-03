@@ -167,7 +167,7 @@ build-binary-release() {
     [ -d empty-project/tup-scripts ] || (cd empty-project && git clone https://github.com/matzke1/tup-scripts)
     cp rose-installed/latest/include/rose-installed-make.cfg empty-project/rose.cfg
     cp empty-project/tup-scripts/post-install-script empty-project/.
-    run spock-shell --with patchelf --install=yes -C empty-project tup-scripts/rose-make-binary-release
+    run spock-shell --with patchelf --install=yes -C empty-project tup-scripts/rose-make-binary-release --verbose
     mv empty-project/rose-* .
     rm -rf empty-project
 }
