@@ -47,9 +47,9 @@ for each of the installer scripts.
 | Script                            |       Date |      ROSE | Megachiropteran | ESTCP | Result                                         |
 |-----------------------------------+------------+-----------+-----------------+-------+------------------------------------------------|
 | install-binaryanalysis-ubuntu1804 | 2020-04-03 | 0.10.0.28 | yes             | yes   | pass                                           |
-| install-binaryanalysis-ubuntu1910 | 2020-04-03 | 0.10.0.28 | yes             | yes   |                                                |
+| install-binaryanalysis-ubuntu1910 | 2020-04-03 | 0.10.0.28 | yes             | yes   | fails when building binary release (ROSE-2627) |
 | install-binaryanalysis-centos7    | 2020-04-03 | 0.10.0.28 | yes             | yes   | fails when building binary release (ROSE-2627) |
-| install-binaryanalysis-centos6    | 2020-04-03 | 0.10.0.28 | yes             | yes   |                                                |
-| install-binaryanalysis-mint18     | 2020-04-03 | 0.10.0.28 | yes             | yes   |                                                |
-| install-binaryanalysis-mint19     | 2020-04-03 | 0.10.0.28 | ye              | yes   |                                                |
+| install-binaryanalysis-centos6    |            | 0.10.0.28 | yes             | yes   |                                                |
+| install-binaryanalysis-mint18     | 2020-04-06 | 0.10.0.30 | yes             | yes   | pass                                           |
+| install-binaryanalysis-mint19     |            | 0.10.0.28 | yes             | yes   | pass                                           |
 
