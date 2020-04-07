@@ -39,17 +39,30 @@ Each of these scripts performs the following steps:
 * Prepares the binary release for distribution by compressing and
   encrypting it.
   
+# Instructions
+
+1. Choose a system on which to install. Use the `Test dates` section
+   below to help make your choice.
+
+2. Look at the top of the shell script (in this directory) and follow
+   the instructions at the top of the script.
+
+3. This process produces an installation of ROSE plus a binary release
+   that can be transferred to another machine.  Note that CentOS
+   binary releases also work on Red Hat systems with the same version
+   number.
+
 # Test dates
 
 The following table describes when the most recent test was performed
 for each of the installer scripts.
 
-| Script                            |       Date |      ROSE | Megachiropteran | ESTCP | Result                                         |
-|-----------------------------------+------------+-----------+-----------------+-------+------------------------------------------------|
-| install-binaryanalysis-ubuntu1804 | 2020-04-03 | 0.10.0.28 | yes             | yes   | pass                                           |
-| install-binaryanalysis-ubuntu1910 | 2020-04-03 | 0.10.0.28 | yes             | yes   | fails when building binary release (ROSE-2627) |
-| install-binaryanalysis-centos7    | 2020-04-03 | 0.10.0.28 | yes             | yes   | fails when building binary release (ROSE-2627) |
-| install-binaryanalysis-centos6    |            | 0.10.0.28 | yes             | yes   |                                                |
-| install-binaryanalysis-mint18     | 2020-04-06 | 0.10.0.30 | yes             | yes   | pass                                           |
-| install-binaryanalysis-mint19     |            | 0.10.0.28 | yes             | yes   | pass                                           |
+	| Script                            |       Date |      ROSE | Megachiropteran | ESTCP | Result                                         |
+	|-----------------------------------+------------+-----------+-----------------+-------+------------------------------------------------|
+	| install-binaryanalysis-ubuntu1804 | 2020-04-03 | 0.10.0.28 | yes             | yes   | pass                                           |
+	| install-binaryanalysis-ubuntu1910 | 2020-04-03 | 0.10.0.28 | yes             | yes   | fails when building binary release (ROSE-2627) |
+	| install-binaryanalysis-centos7    | 2020-04-03 | 0.10.0.28 | yes             | yes   | fails when building binary release (ROSE-2627) |
+	| install-binaryanalysis-centos6    |            | 0.10.0.28 | yes             | yes   |                                                |
+	| install-binaryanalysis-mint18     | 2020-04-06 | 0.10.0.30 | yes             | yes   | pass                                           |
+    | install-binaryanalysis-mint19     |            | 0.10.0.28 | yes             | yes   | pass                                           |
 
