@@ -6,34 +6,31 @@
 #
 # Prerequisite steps:
 #
-#  1. Create an AWS machine with a CentOS-6 AMI such as "CentOS 6 (x86_64) with Updates HVM". The machine should be
-#     large enough, such as m4.4xlarge (16 CPUs, 64 GiB RAM).
+#  1. Create a new CentOS-6 machine, such as an AWS machine with a CentOS-6 AMI such as "CentOS 6 (x86_64) with Updates
+#     HVM". The machine should be large enough, such as m4.4xlarge (16 CPUs, 64 GiB RAM).
 #
-#     It doesn't work to enlarge the root file system before launching this instance, so instead, attach a separate
-#     volume with at least 40 GiB of storage.
+#     For some reason, for an AWS CentOS-6 AMI, it doesn't work to enlarge the root file system before launching this
+#     instance, so instead, attach a separate volume with at least 40 GiB of storage and run these commands after you've
+#     logged in the first time on this type of machine:
 #
-#  2. Log in as a normal (non-root) user, and due to not being able to automatically extend the root filesystem on these
-#     AWS CentOS-6 machines, run the following commands or something similar depending on your particular situation:
+#       # Extra commands for AWS machines with broken automtic growing of root filesystem
+#      	sudo fdisk /dev/xvdb  (then enter "n RET p RET 1 RET RET RET w RET")
+#      	sudo mke2fs /dev/xvdb1
+#      	sudo mount /dev/xvdb1 /mnt
+#      	sudo chown centos6:centos6 /mnt
+#      	mkdir /mnt/tmp
+#      	export TMPDIR=/mnt/tmp
+#      	mkdir /mnt/.spock
+#      	ln -s /mnt/.spock ~/.spock
+#      	mkdir /mnt/rose-installed
+#      	ln -s /mnt/rose-installed ~/rose-installed
+#      	cd /mnt
 #
-#      sudo fdisk /dev/xvdb  (then enter "n RET p RET 1 RET RET RET w RET")
-#      sudo mke2fs /dev/xvdb1
-#      sudo mount /dev/xvdb1 /mnt
-#      sudo chown centos6:centos6 /mnt
-#      mkdir /mnt/tmp
-#      export TMPDIR=/mnt/tmp
-#      mkdir /mnt/.spock
-#      rm -rf ~/.spock
-#      ln -s /mnt/.spock ~/.spock
-#      mkdir /mnt/rose-installed
-#      rm -rf ~/rose-installed
-#      ln -s /mnt/rose-installed ~/rose-installed
-#      cd /mnt
+#  2. Run "sudo yum -y install git"
 #
-#  3. Run "sudo yum -y install git"
+#  3. Run "git clone https://github.com/matzke1/rose-installers"
 #
-#  4. Run "git clone https://github.com/matzke1/rose-installers"
-#
-#  5. Run "./rose-installers/install-binaryanalysis-centos6"
+#  4. Run "./rose-installers/install-binaryanalysis-centos6"
 #
 # If this script fails part way through, it's often possible to make adjustments to the system and then re-run this
 # script after commenting out the steps at the end that have already been completed.
