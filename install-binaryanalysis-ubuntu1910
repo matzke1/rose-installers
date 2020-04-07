@@ -41,14 +41,6 @@ install-system-dependencies() {
     libxrender-dev libxi-dev libfontconfig1-dev libatspi2.0-dev libdbus-1-dev
 }
 
-# Decide what software dependencies should be used when compiling ROSE.
-choose-rose-dependencies() {
-    rm -rf rose/_build
-    mkdir rose/_build
-    (cd rose/_build && BUILD=tup run rmc init --project=binaries --batch ..)
-}
-
-
 ########################################################################################################################
 
 check-hardware-requirements 50000000
