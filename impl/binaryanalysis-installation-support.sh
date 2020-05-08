@@ -191,7 +191,7 @@ compress-binary-release() {
 ########################################################################################################################
 
 conditionally-install-megachiropteran() {
-    read -p "Do you want to download and build Megachiropteran tools (optional)? " -e -i 'no'
+    read -p "Do you want to download and build Megachiropteran tools (optional)? " -e -i 'n'
     case "$REPLY" in
 	[Yy]*)
 	    show-lc-bitbucket-instructions
@@ -205,7 +205,7 @@ conditionally-install-megachiropteran() {
 }
 
 conditionally-install-estcp() {
-    read -p "Do you want to download and build ESTCP tools (optional)? " -e -i 'no'
+    read -p "Do you want to download and build ESTCP tools (optional)? " -e -i 'n'
     case "$REPLY" in
 	[Yy]*)
 	    show-lc-bitbucket-instructions
