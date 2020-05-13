@@ -36,6 +36,9 @@ install-system-dependencies() {
 	libfcgi-dev libfuse-dev patchelf gcc-multilib g++-multilib gfortran-multilib \
 	fuse bsdmainutils libxapian-dev p7zip-full
 
+    # If building SQLite from source code
+    sudo apt-get -y install fossil
+
     # If building ROSE graphical user interfaces that use Qt
     sudo apt-get -y install qt5-default '^libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev \
     libxrender-dev libxi-dev libfontconfig1-dev libatspi2.0-dev libdbus-1-dev
