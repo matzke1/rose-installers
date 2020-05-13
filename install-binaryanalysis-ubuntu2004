@@ -37,7 +37,7 @@ install-system-dependencies() {
 	fuse bsdmainutils libxapian-dev p7zip-full
 
     # If building SQLite from source code
-    sudo apt-get -y install fossil
+    sudo apt-get -y install fossil tclsh
 
     # If building ROSE graphical user interfaces that use Qt
     sudo apt-get -y install qt5-default '^libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev \
