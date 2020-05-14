@@ -41,7 +41,7 @@ install-system-dependencies() {
     while ! which scl; do
 	# Often fails the first time it runs, so just try a few times
 	sleep 5
-	sudo yum -y install centos-release-scl devtoolset-6
+	sudo yum -y install centos-release-scl devtoolset-7
     done
     
     sudo chmod 4755 /bin/fusermount # If you plan to build with Tup
@@ -59,7 +59,7 @@ install-system-dependencies() {
 run() {
     (
 	set -x
-	scl enable devtoolset-6 -- "$@"
+	scl enable devtoolset-7 -- "$@"
     )
 }
 
