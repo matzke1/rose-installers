@@ -63,7 +63,7 @@ for each of the installer scripts.
     | install-binaryanalysis-ubuntu2004 | 2020-05-06 |  0.10.4.2 | yes             | yes   | pass      |
     | install-binaryanalysis-ubuntu1804 | 2020-05-14 | 0.10.4.18 | yes             | yes   | pass      |
     | install-binaryanalysis-ubuntu1910 | 2020-04-03 | 0.10.0.28 | yes             | yes   | failure 1 |
-    | install-binaryanalysis-centos7    | 2020-04-03 | 0.10.0.28 | yes             | yes   | failure 1 |
+    | install-binaryanalysis-centos7    | 2020-05-14 | 0.10.4.18 | yes             | yes   | pass      |
     | install-binaryanalysis-centos6    | 2020-04-03 | 0.10.0.28 | yes             | yes   | failure 1 |
     | install-binaryanalysis-mint18     | 2020-04-06 | 0.10.0.30 | yes             | yes   | pass      |
     | install-binaryanalysis-mint19     | 2020-04-06 | 0.10.0.30 | yes             | yes   | pass      |
