@@ -98,42 +98,6 @@ build-test-install-rose() {
     run rmc -C rose/_build install
 }
 
-# Show instructions about how to obtain Megachiropteran and/or ESTCP binary analysis tools.
-show-lc-bitbucket-instructions() {
-    cat <<EOF
-Perform the following steps before continuing:
-  1. Obtain an Livermore Computing (LC) Official User Identification (OUID). This is the same as your LLNL OUID but
-     is an extra step to obtain it. You'll also get an LC SecurID one-time password token and associated PIN.
-  2. Generate an SSH public/private key pair and send your LC OUID and public half of the key to matzke1@llnl.gov who
-     will add these credentials to the access list. Specify that you want megachiropteran and/or ESTCP access.
-  3. Add the following lines to your ~/.ssh/config if you're located off site (other than *.llnl.gov domain) because
-     LC does not allow direct connections to the BitBucket server.
-        |Host cz-bitbucket.llnl.gov
-        |    ProxyCommand ssh oslic.llnl.gov 'nc %h 7999'
-        |    ForwardAgent no
-        |    ForwardX11 no
-  4. (Optional) The above steps can be skipped if you manually place a copy of the Megachiropteran source code
-     in the "megachiropteran" directory, and/or a copy of the ESTCP source code in the "estcp-software" directory.
-EOF
-
-    read -p "Have you completed these steps? " -e -i "y"
-    case "$REPLY" in
-	[Yy*])
-	    : good
-	    ;;
-	*)
-	    echo "ROSE public library and tools have been installed, but not additional software"
-	    exit 0
-    esac
-}
-
-# Get the Megachiropteran tools from the private repository.
-get-megachiropteran-source-code() {
-    if [ ! -d megachiropteran ]; then
-	git clone ssh://git@cz-bitbucket.llnl.gov:7999/bat/bat-source.git megachiropteran
-    fi
-}
-
 # Build, test, and install the Megachiropteran tools.
 build-test-install-megachiropteran() {
     # [ROSE-2593] We need to temporarily disable the bat-conc tool since we configured ROSE without any database
@@ -141,13 +105,6 @@ build-test-install-megachiropteran() {
     sed -i 's/^\(run .*bat-conc\)/#\1/' megachiropteran/Tupfile
 
     run spock-shell -C megachiropteran --with tup,patchelf --install ./configure latest install
-}
-
-# Get the ESTCP tools from the private repository.
-get-estcp-source-code() {
-    if [ ! -d estcp-software ]; then
-	git clone ssh://git@cz-bitbucket.llnl.gov:7999/estcp/software.git estcp-software
-    fi
 }
 
 # Build, test, and install the ESTCP tools.
@@ -191,29 +148,9 @@ compress-binary-release() {
 ########################################################################################################################
 
 conditionally-install-megachiropteran() {
-    read -p "Do you want to download and build Megachiropteran tools (optional)? " -e -i 'n'
-    case "$REPLY" in
-	[Yy]*)
-	    show-lc-bitbucket-instructions
-	    get-megachiropteran-source-code
-	    build-test-install-megachiropteran
-	    ;;
-	*)
-	    : skipped
-	    ;;
-    esac
+    [ -x megachiropteran ] && build-test-install-megachiropteran
 }
 
 conditionally-install-estcp() {
-    read -p "Do you want to download and build ESTCP tools (optional)? " -e -i 'n'
-    case "$REPLY" in
-	[Yy]*)
-	    show-lc-bitbucket-instructions
-	    get-estcp-source-code
-	    build-test-install-estcp
-	    ;;
-	*)
-	    : skipped
-	    ;;
-    esac
+    [ -x estcp-software ] && build-test-install-estcp
 }
