@@ -82,9 +82,10 @@ choose-rose-dependencies() {
     # capstone is not needed but was enabled by default
     # magic is not needed because it's not fully supported in Tup builds
     # libpqxx is disabled because the library doesn't get inserted into the binary release (ROSE-2592)
+    # sqlite cannot be built from source because fossil is not available on this system
     # patchelf-0.10 doesn't compile here
     run spock-shell --with patchelf-0.9 --install true
-    (cd rose/_build && BUILD=tup CAPSTONE=none MAGIC=none PQXX=none run rmc init --project=binaries --batch ..)
+    (cd rose/_build && BUILD=tup CAPSTONE=none MAGIC=none PQXX=none SQLITE=none run rmc init --project=binaries --batch ..)
 }
 
 ########################################################################################################################
