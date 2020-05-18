@@ -13,9 +13,12 @@
 #
 #  3. Run "sudo apt-get install git"
 #
-#  4. Run "git clone https://github.com/matzke1/rose-installers"
+#  4. Optionally copy Megachiropteran and/or ESTCP source code into the "megachiropteran" and "estcp-software"
+#     directories. They will be built and installed if present.
 #
-#  5. Run "./rose-installers/install-binaryanalysis-mint19"
+#  5. Run "git clone https://github.com/matzke1/rose-installers"
+#
+#  6. Run "./rose-installers/install-binaryanalysis-mint19"
 #
 # If this script fails part way through, it's often possible to make adjustments to the system and then re-run this
 # script after commenting out the steps at the end that have already been completed.
