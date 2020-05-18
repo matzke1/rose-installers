@@ -148,9 +148,13 @@ compress-binary-release() {
 ########################################################################################################################
 
 conditionally-install-megachiropteran() {
-    [ -x megachiropteran ] && build-test-install-megachiropteran
+    if [ -x megachiropteran ]; then
+	build-test-install-megachiropteran
+    fi
 }
 
 conditionally-install-estcp() {
-    [ -x estcp-software ] && build-test-install-estcp
+    if [ -x estcp-software ]; then
+	build-test-install-estcp
+    fi
 }
