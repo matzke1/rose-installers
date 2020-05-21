@@ -1,0 +1,70 @@
+#!/bin/bash
+########################################################################################################################
+# This script is able to install ROSE on a clean CentOS-8 machine, configuring ROSE for binary analysis
+# (--enable-languages=binaries) along with a number of software packages that increase the feature set of the binary
+# analysis.
+#
+# Prerequisite steps:
+#
+#  1. Create an AWS machine with a CentOS-8 AMI such as "CentOS 7 x86_64 HVM". The machine should be large enough, such
+#     as m5.4xlarge (16 CPUs, 64 GiB RAM). Enlarge the root file system to be at least 60 GiB.
+#
+#  2. Log in as a normal (non-root) user
+#
+#  3. Run "sudo yum -y install git"
+#
+#  4. Optionally copy Megachiropteran and/or ESTCP source code into the "megachiropteran" and "estcp-software"
+#     directories. They will be built and installed if present.
+#
+#  5. Run "git clone https://github.com/matzke1/rose-installers"
+#
+#  6. Run "./rose-installers/install-binaryanalysis-centos8"
+#
+# If this script fails part way through, it's often possible to make adjustments to the system and then re-run this
+# script after commenting out the steps at the end that have already been completed.
+#
+########################################################################################################################
+set -e
+arg0="${0##*/}"
+dir0="${0%/*}"
+
+. "${dir0}/impl/binaryanalysis-installation-support.sh"
+export PATH="$HOME/.spock/bin:$PATH"
+
+# These instructions come from https://rosecompiler.atlassian.net/wiki/x/vwBhF
+install-system-dependencies() {
+    ### WARNING: yum commands don't exit with non-zero status if they fail!!!!!!
+    sudo yum -y update
+    sudo yum -y install wget tar cmake java-1.8.0-openjdk-devel graphviz gcc-c++ flex bison \
+         bzip2 zlib-devel libtool libtool-ltdl-devel byacc libgcrypt-devel xz \
+         fuse fuse-devel passwd fontconfig mesa-libGLU pcre-devel patch \
+         postgresql-devel ghostscript make
+
+    # Static libraries (needed by some ROSE dependencies)
+    sudo dnf config-manager --enable PowerTools
+    sudo yum -y install glibc-static libstdc++-static
+}
+
+# Decide what software dependencies should be used when compiling ROSE.
+choose-rose-dependencies() {
+    rm -rf rose/_build
+    mkdir rose/_build
+    # SQLite is not supported because it needs fossil, which is not a CentOS package.
+    (cd rose/_build && BUILD=tup SQLITE=none run rmc init --project=binaries --batch ..)
+}
+
+########################################################################################################################
+
+check-hardware-requirements 50000000
+install-system-dependencies
+install-rmc-spock
+get-rose-source-code
+choose-rose-dependencies
+install-rose-dependencies
+create-automake-files
+configure-rose
+build-test-install-rose
+conditionally-install-megachiropteran
+conditionally-install-estcp
+build-binary-release
+compress-binary-release
