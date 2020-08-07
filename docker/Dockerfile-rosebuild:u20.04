@@ -1,0 +1,25 @@
+# Docker image creation -*- shell-script -*-
+#
+# The purpose of this Dockerfile is to download, configure, build, test, and install the latest public version of ROSE.
+#
+
+# A container where the ROSE prerequisites are already installed
+from matzke/rosedev:u20.04
+
+# Commands come from installation scripts, but we comment out the steps that were already done in the parent Docker image.
+run : 2020-08-07: modify THIS line to force Docker to clone the latest version of rose-installers in the next line
+run rm -rf rose-installers rose
+run git clone https://github.com/matzke1/rose-installers
+run sed -i~ '/^check-hardware-requirements /,/^install-rmc-spock$/ s/^/#/' ./rose-installers/install-binaryanalysis-ubuntu2004
+
+# RMC/Spock is installed in per-host directories, but the host name constantly changes in containers. Therefore we need to
+# create symlinks from the current host name to the original host name.
+
+
+run find $HOME/.spock -type d -name $(find $HOME/.spock/bin -mindepth 1 -maxdepth 1 -type d |sed -n '1 s%.*/%%p') |sed "s%\(\(.*\)/[^/]*\)$%ln -s \1 \2/$(hostname)%" |bash
+run ls -l $HOME/.spock/bin
+
+run export PATH="$HOME/.spock/bin:$PATH"; spock-ls
+
+# This is where all the real work happens, with the end result that ROSE is installed and a binary release file is created.
+run ./rose-installers/install-binaryanalysis-ubuntu2004

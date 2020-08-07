@@ -1,0 +1,55 @@
+# Docker image creation -*- shell-script -*-
+#
+# The purpose of this Dockerfile is to create a container image that includes all the supporting software needed to
+# build a particular configuration of any recent version of ROSE. Although you can build any configuration of ROSE in
+# the resulting container, the image is tuned for ROSE configured with binary analysis support and no other language
+# analysis support.
+#
+# To build the container image run this command:
+#    $ docker image build -f Dockerfile-rosedev:u20.04 -t rosedev:u20.04 .
+#
+# To upload the container to hub.docker:
+#    $ docker login
+#    $ docker tag rosedev:u20.04 $DOCKERHUB_USER/rosedev:u20.04
+#    $ docker push $DOCKERHUB_USER/rosedev:u20.04
+#
+# NOTE: I am using lower-case Docker instructions in this file contrary to docker conventions. Upper-case to accent the
+# docker-specific words is just silly since all lines in this file must be docker instructions.
+#
+
+########################################################################################################################
+# Operating system.
+########################################################################################################################
+
+from ubuntu:20.04
+run env DEBIAN_FRONTEND=noninteractive apt-get update
+run env DEBIAN_FRONTEND=noninteractive apt-get -y install git fossil
+run env DEBIAN_FRONTEND=noninteractive apt-get -y install openssh-server # convenient, but not necessary
+
+########################################################################################################################
+# Wrappers
+########################################################################################################################
+
+# sudo causes problems in Docker containers, so just run without it.
+run echo '#!/bin/bash' >/bin/sudo
+run echo 'exec "$@"' >> /bin/sudo
+run chmod 755 /bin/sudo
+
+########################################################################################################################
+# Build all the ROSE prerequisites for a particular configuration so we don't have to do that each time.
+########################################################################################################################
+
+run : serial 2020-08-07b: change to force Docker image rebuild
+run git clone https://github.com/matzke1/rose-installers
+
+# Comment out all the stuff about installing ROSE since we're only interested in setting up the environment
+run sed -i~ '/^build-test-install-rose$/,$ s/^/#/' ./rose-installers/install-binaryanalysis-ubuntu2004
+run sed -i~ 's/^get-rose-source-code$/get-rose-fake-source-code/' ./rose-installers/install-binaryanalysis-ubuntu2004
+run echo 'export SPOCK_HOSTNAME=container' >> "$HOME/.bashrc"
+run echo 'export PATH="$HOME/.spock/bin:$PATH"' >> "$HOME/.bashrc"
+run env SPOCK_HOSTNAME=container ./rose-installers/install-binaryanalysis-ubuntu2004
+
+# Previous steps downloaded the ROSE source code. We no longer need that since we'll be using this docker image
+# to build OTHER versions or ROSE than this one.
+run rm -rf rose
+

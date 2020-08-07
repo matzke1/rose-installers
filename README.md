@@ -39,7 +39,7 @@ Each of these scripts performs the following steps:
 * Prepares the binary release for distribution by compressing and
   encrypting it.
   
-# Instructions
+# Instructions for scripts
 
 1. Choose a system on which to install. Use the `Test dates` section
    below to help make your choice.
@@ -51,6 +51,26 @@ Each of these scripts performs the following steps:
    that can be transferred to another machine.  Note that CentOS
    binary releases also work on Red Hat systems with the same version
    number.
+   
+# Instructions for Docker
+
+These instructions are not ready to use yet (under development).
+
+You can also install the latest public release of ROSE from source
+code in a docker container (or any other version of ROSE with some
+minor editing).
+
+1. Change to the "docker" directory of this repository.
+
+2. Run `docker image create -f Dockerfile-rosebuild:u20.04 -t
+   rosebuild:u20.04` to create the image that will contain the latest
+   ROSE public release configured for binary analysis.
+   
+3. Run `docker run -it rosebuild:u20.04 bash --login`. ROSE has been
+   installed in the "rose-installed/latest" directory and there is
+   also a binary release file that you can copy and install on other
+   Ubuntu 20.04 systems.
+   
 
 # Test dates
 
