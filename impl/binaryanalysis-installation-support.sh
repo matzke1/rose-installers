@@ -65,6 +65,16 @@ get-rose-source-code() {
     git clone -b develop https://github.com/rose-compiler/rose
 }
 
+# Similar to get-rose-source-code, but fakes it just enough that RMC can run. This is useful if you want
+# to install ROSE prerequisites for a particular ROSE configuration without actually ever downloading
+# any part of ROSE itself. RMC just checks for some arbitrary ROSE file, so we'll fake it.
+get-rose-fake-source-code() {
+    mkdir -p rose/src/frontend/BinaryFormats
+    touch rose/src/frontend/BinaryFormats/ElfSection.C
+    mkdir -p rose/config
+    touch rose/config/support-rose.m4
+}
+
 # Decide what software dependencies should be used when compiling ROSE.
 choose-rose-dependencies() {
     rm -rf rose/_build
