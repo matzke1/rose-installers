@@ -44,7 +44,15 @@ install-system-dependencies() {
 
     # If building ROSE graphical user interfaces that use Qt
     sudo apt-get -y install qt5-default '^libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev \
-    libxrender-dev libxi-dev libfontconfig1-dev libatspi2.0-dev libdbus-1-dev
+    libxrender-dev libxi-dev libfontconfig1-dev libatspi2.0-dev libdbus-1-dev libxkbcommon-dev
+
+    sudo strip --remove-section=.note.ABI-tag /usr/lib/x86_64-linux-gnu/libQt5Core.so.5
+}
+
+choose-rose-dependencies() {
+    rm -rf rose/_build
+    mkdir rose/_build
+    (cd rose/_build && BUILD=tup QT=5.12 run rmc init --project=binaries --batch ..)
 }
 
 ########################################################################################################################
