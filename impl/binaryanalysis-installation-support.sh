@@ -132,7 +132,7 @@ build-binary-release() {
     # [ROSE-2596] ROSE doesn't have a script for building a binary release, so we need to grab one from some other repository.
     mkdir -p empty-project
     [ -d empty-project/tup-scripts ] || (cd empty-project && git clone https://github.com/matzke1/tup-scripts)
-    cp rose-installed/latest/include/rose-installed-make.cfg empty-project/rose.cfg
+    cp $HOME/rose-installed/latest/include/rose-installed-make.cfg empty-project/rose.cfg
     cp empty-project/tup-scripts/post-install-script empty-project/.
     run spock-shell --with patchelf --install=yes -C empty-project tup-scripts/rose-make-binary-release --verbose
     mv empty-project/rose-* .
