@@ -13,6 +13,8 @@
 #    $ docker tag rosedev:u20.04 $DOCKERHUB_USER/rosedev:u20.04
 #    $ docker push $DOCKERHUB_USER/rosedev:u20.04
 #
+# This image may already be available on hub.docker.com as matzke/rosedev:u20.04.
+#
 # NOTE: I am using lower-case Docker instructions in this file contrary to docker conventions. Upper-case to accent the
 # docker-specific words is just silly since all lines in this file must be docker instructions.
 #
@@ -41,7 +43,7 @@ run chmod 755 /bin/sudo
 
 # Increment the serial number (date) to cause docker to get the latest ROSE installer scripts instead of using an old
 # cached version.
-run : serial 2020-08-10
+run : serial 2020-08-10b
 run git clone https://github.com/matzke1/rose-installers
 
 # Comment out all the stuff about installing ROSE since we're only interested in setting up the environment
@@ -49,9 +51,9 @@ run sed -i~ '/^create-automake-files$/,$ s/^/#/' ./rose-installers/install-binar
 run sed -i~ 's/^get-rose-source-code$/get-rose-fake-source-code/' ./rose-installers/install-binaryanalysis-ubuntu2004
 
 # Avoid using Tup when building a docker image. The "docker build" command apparently has no way to run privileged
-# commands (such as mounting fuse filesystems when building Tup) although this is perfectly fine to do in the
-# "docker run" command. Therefore, we need to avoid installing Tup and installing any package that uses Tup for
-# its build system, and delay the Tup installation so it happens every time we create a new container instead.
+# commands (such as mounting fuse filesystems when building Tup) although this is perfectly fine to do in the "docker
+# run" command. Therefore, we need to avoid installing Tup and installing any package that uses Tup for its build
+# system, and delay the Tup installation so it happens every time we create a new container instead.
 run sed -i~ '/rmc init/ s/BUILD=tup/BUILD=autoconf/' ./rose-installers/install-binaryanalysis-ubuntu2004
 run sed -i~ '/rmc init/ s/BUILD=tup/BUILD=autoconf/' ./rose-installers/impl/binaryanalysis-installation-support.sh
 
@@ -69,8 +71,7 @@ run env SPOCK_HOSTNAME=container ./rose-installers/install-binaryanalysis-ubuntu
 # Cleanup
 ########################################################################################################################
 
-# Previous steps downloaded the ROSE source code. We no longer need that since we'll be using this docker image
-# to build OTHER versions or ROSE than this one.
+# Remove the fake ROSE source code that was installed above.
 run rm -rf rose
 
 # Clean up the changes we made to the rose-installers scripts, but then comment out the steps we've already done
@@ -85,9 +86,6 @@ run sed -i~ '/rmc init/ s/QT=[^ \t]*//' ./rose-installers/install-binaryanalysis
 # The default run command
 ########################################################################################################################
 
-# Additional packages needed when building ROSE
-run env DEBIAN_FRONTEND=noninteractive apt-get -y install rsync
-
 # The default command is to build and install ROSE, and build a binary release. This also builds Tup since Docker
 # doesn't allow us to do that when creating the image.  You may need to add --privileged to the "docker run" command.
 cmd env SPOCK_HOSTNAME=container ./rose-installers/install-binaryanalysis-ubuntu2004
@@ -95,3 +93,10 @@ cmd env SPOCK_HOSTNAME=container ./rose-installers/install-binaryanalysis-ubuntu
 # You can now create a container based on this image. The container will need to install and use Tup, which requires
 # that FUSE filesystems can be mounted within the container (no need to mount anything outside the container). For that
 # to work, you need to run the container with --privileged (or some specific lesser subset of all privileges).
+#
+# For example:
+#    docker run --privileged -it rosedev:u20.04
+#
+# To also build and install Megachiropteran and/or ESTCP tools (not publically released), you'll need to either create
+# an image that has the "megachiropteran" and/or "estcp-software" directories, or manually add them to your container
+# after it starts and before running the container's default command (see "cmd" line above).
