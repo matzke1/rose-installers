@@ -43,7 +43,7 @@ run chmod 755 /bin/sudo
 
 # Increment the serial number (date) to cause docker to get the latest ROSE installer scripts instead of using an old
 # cached version.
-run : serial 2020-08-10b
+run : serial 2020-08-11b
 run git clone https://github.com/matzke1/rose-installers
 
 # Comment out all the stuff about installing ROSE since we're only interested in setting up the environment
@@ -56,9 +56,6 @@ run sed -i~ 's/^get-rose-source-code$/get-rose-fake-source-code/' ./rose-install
 # system, and delay the Tup installation so it happens every time we create a new container instead.
 run sed -i~ '/rmc init/ s/BUILD=tup/BUILD=autoconf/' ./rose-installers/install-binaryanalysis-ubuntu2004
 run sed -i~ '/rmc init/ s/BUILD=tup/BUILD=autoconf/' ./rose-installers/impl/binaryanalysis-installation-support.sh
-
-# Turn off Qt for now since it's a work in progress (See Pinnow 2020-08-08)
-run sed -i~ '/rmc init/ s/QT=[^ \t]*//' ./rose-installers/install-binaryanalysis-ubuntu2004
 
 # Docker is always changing our host name, so tell Spock to use something consistent.
 run echo 'export SPOCK_HOSTNAME=container' >> "$HOME/.bashrc"
@@ -78,9 +75,6 @@ run rm -rf rose
 run git -C rose-installers reset --hard
 run git -C rose-installers clean -dfxq
 run sed -i~ '/^check-hardware-requirements /,/^install-rmc-spock/ s/^/#/' ./rose-installers/install-binaryanalysis-ubuntu2004
-
-# Turn off Qt for now since it's a work in progress (See Pinnow 2020-08-08)
-run sed -i~ '/rmc init/ s/QT=[^ \t]*//' ./rose-installers/install-binaryanalysis-ubuntu2004
 
 ########################################################################################################################
 # The default run command
