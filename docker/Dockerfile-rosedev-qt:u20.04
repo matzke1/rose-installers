@@ -1,0 +1,91 @@
+# Docker image creation -*- shell-script -*-
+#
+# The purpose of this Dockerfile is to create a container image that includes all the supporting software needed to
+# build a particular configuration of any recent version of ROSE. Although you can build any configuration of ROSE in
+# the resulting container, the image is tuned for ROSE configured with binary analysis support and no other language
+# analysis support.
+#
+# This docker image includes the Qt support, which makes the image about 10x larger than without (20GB vs 2GB).
+#
+# To build the container image run this command:
+#    $ docker image build -f Dockerfile-rosedev-qt:u20.04 -t rosedev-qt:u20.04 .
+#
+# NOTE: I am using lower-case Docker instructions in this file contrary to docker conventions. Upper-case to accent the
+# docker-specific words is just silly since all lines in this file must be docker instructions.
+#
+
+########################################################################################################################
+# Operating system.
+########################################################################################################################
+
+from ubuntu:20.04
+run env DEBIAN_FRONTEND=noninteractive apt-get update
+run env DEBIAN_FRONTEND=noninteractive apt-get -y install git fossil
+run env DEBIAN_FRONTEND=noninteractive apt-get -y install openssh-server # convenient, but not necessary
+
+########################################################################################################################
+# Wrappers
+########################################################################################################################
+
+# sudo causes problems in Docker containers, so just run without it.
+run echo '#!/bin/bash' >/bin/sudo
+run echo 'exec "$@"' >> /bin/sudo
+run chmod 755 /bin/sudo
+
+########################################################################################################################
+# Build all the ROSE prerequisites for a particular configuration so we don't have to do that each time.
+########################################################################################################################
+
+# Increment the serial number (date) to cause docker to get the latest ROSE installer scripts instead of using an old
+# cached version.
+run : serial 2020-08-10b
+run git clone https://github.com/matzke1/rose-installers
+
+# Comment out all the stuff about installing ROSE since we're only interested in setting up the environment
+run sed -i~ '/^create-automake-files$/,$ s/^/#/' ./rose-installers/install-binaryanalysis-ubuntu2004
+run sed -i~ 's/^get-rose-source-code$/get-rose-fake-source-code/' ./rose-installers/install-binaryanalysis-ubuntu2004
+
+# Avoid using Tup when building a docker image. The "docker build" command apparently has no way to run privileged
+# commands (such as mounting fuse filesystems when building Tup) although this is perfectly fine to do in the "docker
+# run" command. Therefore, we need to avoid installing Tup and installing any package that uses Tup for its build
+# system, and delay the Tup installation so it happens every time we create a new container instead.
+run sed -i~ '/rmc init/ s/BUILD=tup/BUILD=autoconf/' ./rose-installers/install-binaryanalysis-ubuntu2004
+run sed -i~ '/rmc init/ s/BUILD=tup/BUILD=autoconf/' ./rose-installers/impl/binaryanalysis-installation-support.sh
+
+# Docker is always changing our host name, so tell Spock to use something consistent.
+run echo 'export SPOCK_HOSTNAME=container' >> "$HOME/.bashrc"
+run echo 'export PATH="$HOME/.spock/bin:$PATH"' >> "$HOME/.bashrc"
+
+# Here happens the real work for building the image.
+run env SPOCK_HOSTNAME=container ./rose-installers/install-binaryanalysis-ubuntu2004
+
+########################################################################################################################
+# Cleanup
+########################################################################################################################
+
+# Remove the fake ROSE source code that was installed above.
+run rm -rf rose
+
+# Clean up the changes we made to the rose-installers scripts, but then comment out the steps we've already done
+run git -C rose-installers reset --hard
+run git -C rose-installers clean -dfxq
+run sed -i~ '/^check-hardware-requirements /,/^install-rmc-spock/ s/^/#/' ./rose-installers/install-binaryanalysis-ubuntu2004
+
+########################################################################################################################
+# The default run command
+########################################################################################################################
+
+# The default command is to build and install ROSE, and build a binary release. This also builds Tup since Docker
+# doesn't allow us to do that when creating the image.  You may need to add --privileged to the "docker run" command.
+cmd env SPOCK_HOSTNAME=container ./rose-installers/install-binaryanalysis-ubuntu2004
+
+# You can now create a container based on this image. The container will need to install and use Tup, which requires
+# that FUSE filesystems can be mounted within the container (no need to mount anything outside the container). For that
+# to work, you need to run the container with --privileged (or some specific lesser subset of all privileges).
+#
+# For example:
+#    docker run --privileged -it rosedev:u20.04
+#
+# To also build and install Megachiropteran and/or ESTCP tools (not publically released), you'll need to either create
+# an image that has the "megachiropteran" and/or "estcp-software" directories, or manually add them to your container
+# after it starts and before running the container's default command (see "cmd" line above).
