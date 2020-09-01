@@ -60,9 +60,11 @@ install-rmc-spock() {
     rm -rf rmc-spock
 }
 
-# Obtain the ROSE source code and places it in the "rose" directory.
+# Obtain the ROSE source code and places it in the "rose" directory, but only if that directory doesn't already exist.
 get-rose-source-code() {
-    git clone -b develop https://github.com/rose-compiler/rose
+    if [ ! -d rose/. ]; then
+	git clone -b develop https://github.com/rose-compiler/rose rose
+    fi
 }
 
 # Similar to get-rose-source-code, but fakes it just enough that RMC can run. This is useful if you want
