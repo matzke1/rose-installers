@@ -43,7 +43,7 @@ run chmod 755 /bin/sudo
 
 # Increment the serial number (date) to cause docker to get the latest ROSE installer scripts instead of using an old
 # cached version.
-run : serial 2020-08-20
+run : serial 2020-09-01
 run git clone https://github.com/matzke1/rose-installers
 
 # Comment out all the stuff about installing ROSE since we're only interested in setting up the environment
@@ -83,7 +83,7 @@ run sed -i~ '/^check-hardware-requirements /,/^install-rmc-spock/ s/^/#/' ./rose
 
 # The default command is to build and install ROSE, and build a binary release. This also builds Tup since Docker
 # doesn't allow us to do that when creating the image.  You may need to add --privileged to the "docker run" command.
-cmd env SPOCK_HOSTNAME=container ./rose-installers/install-binaryanalysis-centos6
+cmd hostname container; env SPOCK_HOSTNAME=container ./rose-installers/install-binaryanalysis-centos6
 
 # You can now create a container based on this image. The container will need to install and use Tup, which requires
 # that FUSE filesystems can be mounted within the container (no need to mount anything outside the container). For that

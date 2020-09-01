@@ -43,7 +43,7 @@ run chmod 755 /bin/sudo
 
 # Increment the serial number (date) to cause docker to get the latest ROSE installer scripts instead of using an old
 # cached version.
-run : serial 2020-08-20
+run : serial 2020-09-01
 run git clone https://github.com/matzke1/rose-installers
 
 # Comment out all the stuff about installing ROSE since we're only interested in setting up the environment
@@ -65,7 +65,7 @@ run echo 'export SPOCK_HOSTNAME=container' >> "$HOME/.bashrc"
 run echo 'export PATH="$HOME/.spock/bin:$PATH"' >> "$HOME/.bashrc"
 
 # Here happens the real work for building the image.
-run env SPOCK_HOSTNAME=container ./rose-installers/install-binaryanalysis-ubuntu1804
+run hostname container; env SPOCK_HOSTNAME=container ./rose-installers/install-binaryanalysis-ubuntu1804
 
 ########################################################################################################################
 # Cleanup

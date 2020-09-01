@@ -1,0 +1,22 @@
+#!/bin/bash
+set -e
+
+# Copy a Docker volumne from one machine to another.
+#
+# Usage: copy-volume LOCAL_VOLUME_NAME REMOTE_SSH_HOST [REMOTE_VOLUME_NAME]
+
+LOCAL_VOLUME_NAME="$1"
+REMOTE_SSH_HOST="$2"
+REMOTE_VOLUME_NAME="$3"
+[ -n "$REMOTE_VOLUME_NAME" ] || REMOTE_VOLUME_NAME="$LOCAL_VOLUME_NAME"
+
+if [ "$LOCAL_VOLUME_NAME" = "" -o "$REMOTE_SSH_HOST" = "" -o "$REMOTE_VOLUME_NAME" = "" ]; then
+    echo "usage: ${0##*/} LOCAL_VOLUME_NAME REMOTE_SSH_HOST [REMOTE_VOLUME_NAME]" >&2
+    exit 1
+fi
+
+ssh "$REMOTE_SSH_HOST" docker volume rm "$REMOTE_VOLUME_NAME" || true
+
+docker run --rm -v "$LOCAL_VOLUME_NAME:/volume" ubuntu:20.04 bash -c "cd /volume && tar cf - ." |\
+    ssh "$REMOTE_SSH_HOST" "docker run --rm -i -v '$REMOTE_VOLUME_NAME:/volume' ubuntu:20.04 bash -c 'cd /volume && tar xpvf -'"
+
