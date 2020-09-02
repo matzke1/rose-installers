@@ -2,11 +2,7 @@
 
 This repository contains scripts that install ROSE on clean machines
 such as newly provisioned machines like AWS EC2 instances, VirtualBox
-VMs, etc.
-
-These scripts may work for incomplete operating systems such as what
-might be present in a Docker container, but this is not the goal for
-these scripts.
+VMs, Docker containers, etc.
 
 Each of these scripts performs the following steps:
 
@@ -16,9 +12,12 @@ Each of these scripts performs the following steps:
 * Installs the ROSE Meta Configuration (RMC/Spock) system that will
   manage the non-system dependencies.
   
-* Downloads the ROSE source code.
+* Downloads the latest development ROSE source code if there is no
+  preexisting "rose" directory.
 
-* Chooses what ROSE dependencies will be used.
+* Chooses what ROSE dependencies will be used. The dependencies may
+  vary slightly across different Linux distributions depending on
+  their capabilities.
 
 * Downloads and installs the chosen dependencies using RMC/Spock.
 
@@ -28,54 +27,91 @@ Each of these scripts performs the following steps:
 
 * Builds, tests, and installs the ROSE library and associated tools.
 
-* Optionally builds, tests, and installs Megachiropteran binary
+* Optionally builds, tests, and installs the Megachiropteran binary
   analysis tools from a private repository.
   
 * Optionally builds, tests, and installs ESTCP binary analysis tools
   from a private repository.
   
-* Builds a binary release package for all installed artifacts.
+* Builds a binary release package for all installed artifacts. This
+  file can be installed (by executing it with the --prefix=... switch)
+  on different machines running the same operating system
+  distributions. The CentOS binary releases will also generally work
+  on Red Hat distributions with the same version number.
 
 * Prepares the binary release for distribution by compressing and
-  encrypting it.
+  encrypting it.  The password and binary release name is emitted in
+  the final output.
+
+The scripts are divided into two halves. The upper half defines
+special cases for the various steps, and the steps are listed in the
+second half.  If step needs to be modified for your particular use
+case, it's best to copy it from the "impl" directory into the top half
+of the script and modify it there. That way you're not affecting other
+OS distributions. If a script fails, the steps that have passed can be
+commented out and the script rerun.
+
+Each script has additional commentary at the top that may have more
+detailed instructions.
   
-# Instructions for scripts
+# Running the scripts directly
 
-1. Choose a system on which to install. Use the `Test dates` section
-   below to help make your choice.
+Running the top-level scripts directly is the easiest way to use
+them. They are occasionally tested in clean AWS EC2 instances or
+VirtualBox guests as indicated in the table below.
 
-2. Look at the top of the shell script (in this directory) and follow
-   the instructions at the top of the script.
+The script can be run in any directory and does all its work in that
+directory, including ROSE source code downloads. The scripts may
+install additional system-wide software (using "sudo"). The use
+RMC/Spock, the ROSE metaconfiguration system, to manage additional
+dependencies which are installed under ~/.spock.
 
-3. This process produces an installation of ROSE plus a binary release
-   that can be transferred to another machine.  Note that CentOS
-   binary releases also work on Red Hat systems with the same version
-   number.
+ROSE itself will be installed in subdirectories of
+~/rose-installations, with the "latest" symlink being updated to point
+to the most recent installation.
    
-# Instructions for Docker
+# Running scripts in Docker containers
 
-These instructions are not ready to use yet (under development).
+The scripts can be run in Docker containers as well. The "docker"
+directory has Dockerfile descriptions of images and each Dockerfile
+has comments at the top that describe how to use it. The general steps
+are:
 
-You can also install the latest public release of ROSE from source
-code in a docker container (or any other version of ROSE with some
-minor editing).
-
-1. Change to the "docker" directory of this repository.
-
-2. Run `docker image create -f Dockerfile-rosebuild:u20.04 -t
-   rosebuild:u20.04` to create the image that will contain the latest
-   ROSE public release configured for binary analysis.
+1. If you desire to build Megachiropteran and/or ESTCP software that's
+   not publicly released, you need to first prepare a Docker volume
+   that contains the software and mount this volume at "/software"
+   when you create the Docker container.  This volume should contain
+   Git bundles of the desired software with names
+   "megachiropteran.bundle" and/or "estcp-software.bundle". See the
+   "scripts" directory for an example of how to create the volume.
    
-3. Run `docker run -it rosebuild:u20.04 bash --login`. ROSE has been
-   installed in the "rose-installed/latest" directory and there is
-   also a binary release file that you can copy and install on other
-   Ubuntu 20.04 systems.
-   
+2. The Docker images described in the "docker" directory are
+   occasionally regenerated and uploaded to hub.docker.com in the
+   "matzke" account. You can use these as the basis of the containers,
+   or you can generate your own images using the instructions at the
+   top of each Dockerfile.
 
+3. Create a Docker container from the chosen image and let it's
+   default command run. This will perform all the steps that have not
+   been already run when the image was created.  Alternatively, you
+   can run /bin/bash and enter the default command manually (shown at
+   the end of each Dockerfile), which gives you the opportunity to
+   copy the build artifacts off the container.
+
+The binary releases are built automatically as part of Robb's workflow
+and are available upon request. They are OUO since they contain
+artifacts generated from source code that is not publicly released.
+   
 # Test dates
 
-The following table describes when the most recent test was performed
-for each of the installer scripts.
+The scripts are run in Docker containers as part of Robb's workflow,
+and are thus tested at least weekly.
+
+Additionally, the scripts are occasionally run directly on AWS EC2
+instances and/or VirtualBox guests. This is usually done in response
+to bug reports by users.
+
+Direct runs on AWS EC2 or VirtualBox.
 
     |-----------------------------------+------------+-----------+-----------------+-------+-----------|
     | Script                            |       Date |      ROSE | Megachiropteran | ESTCP | Result    |
