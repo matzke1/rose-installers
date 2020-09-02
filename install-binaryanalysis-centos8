@@ -44,7 +44,11 @@ install-system-dependencies() {
     sudo dnf -y install langpacks-en glibc-all-langpacks
     sudo dnf -y install 'dnf-command(config-manager)'
     sudo dnf config-manager --enable PowerTools
-    sudo yum -y install glibc-static libstdc++-static texinfo help2man
+    sudo yum -y install glibc-static libstdc++-static
+
+    # Additional utilities that are needed for building ROSE or dependencies. "texinfo" and "help2man" are needed to
+    # install bison. "file" is needed when moving artifacts to the installation directories.
+    sudo dnf -y install texinfo help2man file
 }
 
 # Decide what software dependencies should be used when compiling ROSE.
