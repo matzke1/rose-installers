@@ -75,7 +75,7 @@ run rm -rf rose
 # Note: Git is too old to have the -C switch.
 run cd rose-installers && git reset --hard
 run cd rose-installers && git clean -dfxq
-run sed -i~ '/^check-hardware-requirements /,/^install-rmc-spock/ s/^/#/' ./rose-installers/install-binaryanalysis-centos6
+run sed -i~ '/^check-hardware-requirements/,/^install-rmc-spock/ s/^/#/' ./rose-installers/install-binaryanalysis-centos6
 
 ########################################################################################################################
 # The default run command
