@@ -1,0 +1,48 @@
+#!/bin/bash
+# Regenerate the rosedev:* Docker images found in the CWD and upload them to the hub.docker.com account specified on the
+# command-line (defaulting to "matzke").
+
+set -e
+
+account=matzke
+if [ "$#" -ge 1 ]; then
+    account="$1"
+    shift
+fi
+
+timestamp="$(date "+%Y-%m-%d %H:%M:%S")"
+dockerfile="${TMPDIR-/tmp}/Dockerfile.$$"
+#trap "rm -f $dockerfile" EXIT
+
+for f in Dockerfile-*:*; do
+    case "$f" in
+	*~)
+	    : avoid backup files
+	    ;;
+	*-qt:*)
+	    : avoid images with Qt because they are huge compared to others
+	    ;;
+	*:*)
+	    tag="${f##*:}"
+	    base="${f%:*}"
+	    base="${base#Dockerfile-}"
+
+	    echo
+	    echo "================================================================================"
+	    echo "$base:$tag"
+	    echo "================================================================================"
+
+	    # Each line staring with "run :" is assumed to be a serial number that needs to be updated to force Docker
+	    # to avoid using a cached version of the intermediate image. Such lines will be replaced with something
+	    # unique.
+	    sed 's/\(^[ \t]*run[ \t]\+:\)[ \t].*/\1 '"$timestamp/" <"$f" >"$dockerfile"
+
+	    (
+		set -x
+		docker image build -f "$dockerfile" -t "$base:$tag" .
+		docker tag "$base:$tag" "$account/$base:$tag"
+		docker push "$account/$base:$tag"
+	    )
+	    ;;
+    esac
+done
