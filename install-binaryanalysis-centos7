@@ -55,6 +55,10 @@ install-system-dependencies() {
     sudo rpm -U --quiet p7zip-16.02-10.el7.x86_64.rpm
     sudo rpm -U --quiet p7zip-plugins-16.02-10.el7.x86_64.rpm
     rm p7zip-16.02-10.el7.x86_64.rpm p7zip-plugins-16.02-10.el7.x86_64.rpm
+
+    # Additional utilities that are needed for building ROSE or dependencies. "file" is needed when moving artifacts to
+    # the installation directories, and "rsync" is needed to copy extra files into artifact directories.
+    sudo dnf -y install file rsync
 }
 
 # Some systems require extra commands to be run in each shell.

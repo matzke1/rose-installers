@@ -48,7 +48,7 @@ install-system-dependencies() {
 
     # Additional utilities that are needed for building ROSE or dependencies. "texinfo" and "help2man" are needed to
     # install bison. "file" is needed when moving artifacts to the installation directories.
-    sudo dnf -y install texinfo help2man file
+    sudo dnf -y install texinfo help2man file rsync
 }
 
 # Decide what software dependencies should be used when compiling ROSE.
