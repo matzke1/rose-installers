@@ -4,17 +4,38 @@
 
 set -e
 
+# Parse command-line
 account=matzke
-if [ "$#" -ge 1 ]; then
-    account="$1"
-    shift
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+	--)
+	    shift
+	    break
+	    ;;
+	--account=*)
+	    account="${1#--account=}"
+	    shift
+	    ;;
+	-*)
+	    echo "$0: unknown switch: $1" >&2
+	    exit 1
+	    ;;
+	*)
+	    break
+	    ;;
+    esac
+done
+if [ "$#" -gt 0 ]; then
+   dockerfiles=("$@")
+else
+    dockerfiles=(Dockerfile-*:*)
 fi
 
 timestamp="$(date "+%Y-%m-%d %H:%M:%S")"
 dockerfile="${TMPDIR-/tmp}/Dockerfile.$$"
-#trap "rm -f $dockerfile" EXIT
+trap "rm -f $dockerfile" EXIT
 
-for f in Dockerfile-*:*; do
+for f in "${dockerfiles[@]}"; do
     case "$f" in
 	*~)
 	    : avoid backup files
