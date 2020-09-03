@@ -34,31 +34,37 @@ export PATH="$HOME/.spock/bin:$PATH"
 # These instructions come from https://rosecompiler.atlassian.net/wiki/x/vwBhF
 install-system-dependencies() {
     ### WARNING: yum commands don't exit with non-zero status if they fail!!!!!!
-    sudo yum -y update
+    (
+	set -x
+	sudo yum -y update
  
-    sudo yum -y install wget tar cmake java-1.8.0-openjdk-devel python-devel graphviz gcc-c++ flex bison \
-        bzip2 zlib-devel libtool libtool-ltdl-devel byacc libgcrypt-devel xz \
-        fuse fuse-devel passwd fontconfig mesa-libGLU git pcre-devel patch glibc-static libstdc++-static \
-        libstdc++-devel.i686 ncurses-devel.i686 sudo postgresql-devel ghostscript
+	sudo yum -y install wget tar cmake java-1.8.0-openjdk-devel python-devel graphviz gcc-c++ flex bison \
+             bzip2 zlib-devel libtool libtool-ltdl-devel byacc libgcrypt-devel xz \
+             fuse fuse-devel passwd fontconfig mesa-libGLU git pcre-devel patch glibc-static libstdc++-static \
+             libstdc++-devel.i686 ncurses-devel.i686 sudo postgresql-devel ghostscript
+    )
 
     while ! which scl; do
 	# Often fails the first time it runs, so just try a few times
 	sleep 5
-	sudo yum -y install centos-release-scl devtoolset-7
+	(set -x; sudo yum -y install centos-release-scl devtoolset-7)
     done
-    
-    sudo chmod 4755 /bin/fusermount # If you plan to build with Tup
- 
-    # The following lines are needed for 7z if you're building binary releases of ROSE software
-    wget https://www.mirrorservice.org/sites/dl.fedoraproject.org/pub/epel/7/x86_64/Packages/p/p7zip-16.02-10.el7.x86_64.rpm
-    wget https://www.mirrorservice.org/sites/dl.fedoraproject.org/pub/epel/7/x86_64/Packages/p/p7zip-plugins-16.02-10.el7.x86_64.rpm
-    sudo rpm -U --quiet p7zip-16.02-10.el7.x86_64.rpm
-    sudo rpm -U --quiet p7zip-plugins-16.02-10.el7.x86_64.rpm
-    rm p7zip-16.02-10.el7.x86_64.rpm p7zip-plugins-16.02-10.el7.x86_64.rpm
 
-    # Additional utilities that are needed for building ROSE or dependencies. "file" is needed when moving artifacts to
-    # the installation directories, and "rsync" is needed to copy extra files into artifact directories.
-    sudo dnf -y install file rsync
+    (
+	set -x
+	sudo chmod 4755 /bin/fusermount # If you plan to build with Tup
+ 
+	# The following lines are needed for 7z if you're building binary releases of ROSE software
+	wget https://www.mirrorservice.org/sites/dl.fedoraproject.org/pub/epel/7/x86_64/Packages/p/p7zip-16.02-10.el7.x86_64.rpm
+	wget https://www.mirrorservice.org/sites/dl.fedoraproject.org/pub/epel/7/x86_64/Packages/p/p7zip-plugins-16.02-10.el7.x86_64.rpm
+	sudo rpm -U --quiet p7zip-16.02-10.el7.x86_64.rpm
+	sudo rpm -U --quiet p7zip-plugins-16.02-10.el7.x86_64.rpm
+	rm p7zip-16.02-10.el7.x86_64.rpm p7zip-plugins-16.02-10.el7.x86_64.rpm
+
+	# Additional utilities that are needed for building ROSE or dependencies. "file" is needed when moving artifacts to
+	# the installation directories, and "rsync" is needed to copy extra files into artifact directories.
+	sudo yum -y install file rsync
+    )
 }
 
 # Some systems require extra commands to be run in each shell.
