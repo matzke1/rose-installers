@@ -148,11 +148,13 @@ compress-binary-release() {
     7z a -p$password $release_name.7z $release_name
     local md5sum=$(md5sum "$release_name.7z" |cut -d' ' -f1)
 
-    echo
-    echo "Binary release created:"
-    echo "   name     = $release_name.7z"
-    echo "   password = $password"
-    echo "   md5sum   = $md5sum"
+    (
+	echo
+	echo "Binary release created:"
+	echo "   name     = $release_name.7z"
+	echo "   password = $password"
+	echo "   md5sum   = $md5sum"
+    ) |tee release-info.txt
 }
 
 ########################################################################################################################
