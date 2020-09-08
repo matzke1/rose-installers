@@ -49,6 +49,7 @@ choose-rose-dependencies() {
 
     # Use a C++11 compiler instead of the default C++03. This allows us to use later versions of some dependencies.
     (cd rose/_build && BUILD=tup COMPILER=gnu-c++11 run rmc init --project=binaries --batch ..)
+    cat rose/_build/.rmc-main.cfg
 }
 
 ########################################################################################################################

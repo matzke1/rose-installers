@@ -110,6 +110,8 @@ choose-rose-dependencies() {
 	# The postgresql library (pqxx) can't be built on such an old system (errors from the C++ compiler)
 	(cd rose/_build && BUILD=tup CMAKE=3.13 SQLITE=none JQ=none PQXX=none run rmc init --project=binaries --batch ..)
     )
+
+    cat rose/_build/.rmc-main.cfg
 }
 
 ########################################################################################################################

@@ -82,6 +82,7 @@ choose-rose-dependencies() {
     rm -rf rose/_build
     mkdir rose/_build
     (cd rose/_build && BUILD=tup run rmc init --project=binaries --batch ..)
+    cat rose/_build/.rmc-main.cfg
 }
 
 # Install all the software needed to build ROSE. The software was chosen by choose-rose-dependencies.

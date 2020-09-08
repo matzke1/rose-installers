@@ -83,6 +83,7 @@ choose-rose-dependencies() {
     # libpqxx is disabled because the library doesn't get inserted into the binary release (ROSE-2592)
     # sqlite cannot be built from source because fossil is not available on this system
     (cd rose/_build && BUILD=tup MAGIC=none PQXX=none SQLITE=none run rmc init --project=binaries --batch ..)
+    cat rose/_build/.rmc-main.cfg
 }
 
 ########################################################################################################################
