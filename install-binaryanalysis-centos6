@@ -65,7 +65,12 @@ install-system-dependencies() {
 
     (
 	set -x
-	sudo chmod 4755 /bin/fusermount # If you plan to build with Tup
+
+	# The Z3 installation needs Python-3 for its build system
+	sudo yum -y install rh-python36
+
+	# Tup needs to be able to mount filesystems with FUSE
+	sudo chmod 4755 /bin/fusermount
  
 	# The following lines are needed for 7z if you're building binary releases of ROSE software
 	wget https://www.mirrorservice.org/sites/dl.fedoraproject.org/pub/epel/6/x86_64/Packages/p/p7zip-16.02-10.el6.x86_64.rpm
@@ -83,22 +88,28 @@ install-system-dependencies() {
 run() {
     (
 	set -x
-	scl enable devtoolset-7 -- "$@"
+	scl enable devtoolset-7 rh-python36 -- "$@"
     )
 }
 
 choose-rose-dependencies() {
     rm -rf rose/_build
     mkdir rose/_build
-    # magic is not needed because it's not fully supported in Tup builds
-    # libpqxx is disabled because the library doesn't get inserted into the binary release (ROSE-2592)
-    # sqlite cannot be built from source because fossil is not available on this system
-    # patchelf-0.10 doesn't compile here
-    # yamlcpp cannot be build because cmake-3 cannot be built
-    # jq cannot be built with such an old version of GNU autotools
-    # z3 cannot be built with such an old version of CMake
-    run spock-shell --with patchelf-0.9 --install true
-    (cd rose/_build && BUILD=tup CAPSTONE=none MAGIC=none PQXX=none SQLITE=none YAML=none JQ=none Z3=none run rmc init --project=binaries --batch ..)
+
+    compilers="$(run spock-ls -1 gnu-compilers |sort -r |head -1),default-c,default-c++"
+
+    (
+	set -x
+
+	# patchelf-0.10 doesn't compile here, but 0.9 does.
+	run spock-shell --with patchelf-0.9 --install true
+
+	# The system installed CMake is too old for yamlcpp and Z3, so we use one that RMC/Spock installs.
+	# sqlite cannot be built from source because fossil is not available on this system (errors during download)
+	# jq cannot be built with such an old version of GNU autotools (errors during configuration)
+	# The postgresql library (pqxx) can't be built on such an old system (errors from the C++ compiler)
+	(cd rose/_build && BUILD=tup CMAKE=3.13 SQLITE=none JQ=none PQXX=none run rmc init --project=binaries --batch ..)
+    )
 }
 
 ########################################################################################################################
