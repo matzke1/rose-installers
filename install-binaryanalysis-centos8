@@ -55,18 +55,10 @@ install-system-dependencies() {
 	sudo dnf -y install p7zip p7zip-plugins
 
 	# Additional utilities that are needed for building ROSE or dependencies. "texinfo" and "help2man" are needed to
-	# install bison. "file" is needed when moving artifacts to the installation directories.
-	sudo dnf -y install diffutils file help2man rsync texinfo
+	# install bison. "file" is needed when moving artifacts to the installation directories. "tcl-devel" is needed to
+	# install SQLite.
+	sudo dnf -y install diffutils file help2man rsync texinfo tcl-devel
     )
-}
-
-# Decide what software dependencies should be used when compiling ROSE.
-choose-rose-dependencies() {
-    rm -rf rose/_build
-    mkdir rose/_build
-    # SQLite is not supported because it needs fossil, which is not a CentOS package.
-    (cd rose/_build && BUILD=tup SQLITE=none run rmc init --project=binaries --batch ..)
-    cat rose/_build/.rmc-main.cfg
 }
 
 ########################################################################################################################

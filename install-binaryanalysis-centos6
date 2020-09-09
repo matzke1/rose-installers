@@ -69,6 +69,9 @@ install-system-dependencies() {
 	# The Z3 installation needs Python-3 for its build system
 	sudo yum -y install rh-python36
 
+	# The SQLite installation needs tcl for its build system
+	sudo yum -y install tcl-devel
+
 	# Tup needs to be able to mount filesystems with FUSE
 	sudo chmod 4755 /bin/fusermount
  
@@ -105,10 +108,9 @@ choose-rose-dependencies() {
 	run spock-shell --with patchelf-0.9 --install true
 
 	# The system installed CMake is too old for yamlcpp and Z3, so we use one that RMC/Spock installs.
-	# sqlite cannot be built from source because fossil is not available on this system (errors during download)
 	# jq cannot be built with such an old version of GNU autotools (errors during configuration)
 	# The postgresql library (pqxx) can't be built on such an old system (errors from the C++ compiler)
-	(cd rose/_build && BUILD=tup CMAKE=3.13 SQLITE=none JQ=none PQXX=none run rmc init --project=binaries --batch ..)
+	(cd rose/_build && BUILD=tup CMAKE=3.13 JQ=none PQXX=none run rmc init --project=binaries --batch ..)
     )
 
     cat rose/_build/.rmc-main.cfg

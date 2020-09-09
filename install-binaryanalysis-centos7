@@ -52,7 +52,12 @@ install-system-dependencies() {
 
     (
 	set -x
-	sudo chmod 4755 /bin/fusermount # If you plan to build with Tup
+
+	# If you plan to build with Tup
+	sudo chmod 4755 /bin/fusermount
+
+	# SQLite's build system needs TCL
+	sudo yum -y install tcl-devel
  
 	# The following lines are needed for 7z if you're building binary releases of ROSE software
 	wget https://www.mirrorservice.org/sites/dl.fedoraproject.org/pub/epel/7/x86_64/Packages/p/p7zip-16.02-10.el7.x86_64.rpm
@@ -81,8 +86,7 @@ choose-rose-dependencies() {
     mkdir rose/_build
     # magic is not needed because it's not fully supported in Tup builds
     # libpqxx is disabled because the library doesn't get inserted into the binary release (ROSE-2592)
-    # sqlite cannot be built from source because fossil is not available on this system
-    (cd rose/_build && BUILD=tup MAGIC=none PQXX=none SQLITE=none run rmc init --project=binaries --batch ..)
+    (cd rose/_build && BUILD=tup MAGIC=none PQXX=none run rmc init --project=binaries --batch ..)
     cat rose/_build/.rmc-main.cfg
 }
 
