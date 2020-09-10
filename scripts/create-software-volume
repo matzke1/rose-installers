@@ -1,40 +1,55 @@
 #!/bin/bash
 set -ex
 
-MEGACHIROPTERAN=
-ESTCP=
+# MEGACHIROPTERAN=
+# ESTCP=
+# VXWORKS_ATTRLIB=
+
+########################################################################################################################
 
 # Robb's development machines
-if [ -d $HOME/rose-wip/megachiropteran/. ]; then
+if [ -d "$HOME/rose-wip/megachiropteran/." ]; then
     MEGACHIROPTERAN="$(pwd)/megachiropteran.bundle"
     git -C "$HOME/rose-wip/megachiropteran" bundle create "$MEGACHIROPTERAN" HEAD
 fi
-if [ -d $HOME/estcp/software/. ]; then
+
+if [ -d "$HOME/estcp/software/." ]; then
     ESTCP="$(pwd)/estcp-software.bundle"
     git -C "$HOME/estcp/software" bundle create "$ESTCP" HEAD
 fi
 
-if [ -n "$MEGACHIROPTERAN" -o -n "$ESTCP" ]; then
-
-    # Create a Dockerfile that creates the volume
-    DOCKERFILE="Dockerfile.$$"
-    (
-	echo "# -*- shell-script -*-"
-	echo "from ubuntu:20.04"
-	echo "run : $(date +"%Y-%m-%d %H:%M:%S")"
-	echo "run mkdir -p /software"
-	[ -n "$MEGACHIROPTERAN" ] && echo "add ${MEGACHIROPTERAN##*/} /software/${MEGACHIROPTERAN##*/}"
-	[ -n "$ESTCP" ] && echo "add ${ESTCP##*/} /software/${ESTCP##*/}"
-	echo "volume /software"
-    ) >"$DOCKERFILE"
-    trap "rm '$DOCKERFILE'" EXIT
-    cat -n "$DOCKERFILE"
-
-    image_name="populate-software-volume.image"
-    volume_name=ouo-software
-
-    docker volume rm "$volume_name" || true
-    docker image build -f "$DOCKERFILE" -t "$image_name" .
-    docker run --rm -it --mount "source=$volume_name,destination=/software" "$image_name" true
-    docker image rm "$image_name"
+if [ -d "$HOME/GS-CAD/ROSE/Jaccel/vxworks_attributeLib/." ]; then
+    VXWORKS_ATTRLIB="$(pwd)/vxworks_attributeLib"
+    rsync -ai --delete --exclude="*~" "$HOME/GS-CAD/ROSE/Jaccel/vxworks_attributeLib/" "$VXWORKS_ATTRLIB"
 fi
+
+
+########################################################################################################################
+# Create a Dockerfile that creates the volume
+DOCKERFILE="Dockerfile.$$"
+(
+    echo "# -*- shell-script -*-"
+    echo "from ubuntu:20.04"
+    echo "run : $(date +"%Y-%m-%d %H:%M:%S")"
+    echo "run mkdir -p /software"
+
+    for f in "$MEGACHIROPTERAN" "$ESTCP" "$VXWORKS_ATTRLIB"; do
+	if [ -n "$f" ]; then
+	    echo "add ${f##*/} /software/${f##*/}"
+	fi
+    done
+
+    echo "volume /software"
+) >"$DOCKERFILE"
+trap "rm '$DOCKERFILE'" EXIT
+cat -n "$DOCKERFILE"
+
+########################################################################################################################
+# Run docker commands to create the volume
+image_name="populate-software-volume.image"
+volume_name=ouo-software
+
+docker volume rm "$volume_name" || true
+docker image build -f "$DOCKERFILE" -t "$image_name" .
+docker run --rm -it --mount "source=$volume_name,destination=/software" "$image_name" true
+docker image rm "$image_name"
