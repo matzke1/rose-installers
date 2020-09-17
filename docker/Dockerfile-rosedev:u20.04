@@ -88,7 +88,8 @@ run sed -i~ '/rmc init/ s/QT=[^ \t]*//' ./rose-installers/install-binaryanalysis
 
 # The default command is to build and install ROSE, and build a binary release. This also builds Tup since Docker
 # doesn't allow us to do that when creating the image.  You may need to add --privileged to the "docker run" command.
-cmd hostname container; env SPOCK_HOSTNAME=container ./rose-installers/install-binaryanalysis-ubuntu2004
+run cd rose-installers && ln -s install-binaryanalysis-ubuntu2004 install-everything
+cmd hostname container; env SPOCK_HOSTNAME=container ./rose-installers/install-everything
 
 # You can now create a container based on this image. The container will need to install and use Tup, which requires
 # that FUSE filesystems can be mounted within the container (no need to mount anything outside the container). For that
