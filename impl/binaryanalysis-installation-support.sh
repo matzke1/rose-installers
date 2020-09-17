@@ -156,6 +156,12 @@ compress-binary-release() {
 	echo "   password = $password"
 	echo "   md5sum   = $md5sum"
     ) |tee release-info.txt
+
+    # If there's a "rose/artifacts" directory, move the release into that directory
+    local artifacts="rose/artifacts"
+    if [ -d "$artifacts/." ]; then
+	mv "$release_name.7z" release-info.txt "$artifacts"
+    fi
 }
 
 ########################################################################################################################
