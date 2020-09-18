@@ -1,0 +1,38 @@
+#!/bin/bash
+#
+########################################################################################################################
+# This script gets invoked from the GitLab continuous integration YAML description, usually called .gitlab-ci.yml but in
+# ROSE's case is called .gitlab-binary-analysis.yml.  This script expects to be invoked from inside the ROSE source
+# repository being tested by GitLab, and to be run inside one of the matzke/rosedev docker containers. These containers
+# already have most ROSE dependencies for binary analysis installed, they have RMC/Spock installed, and they have the
+# rose-installers scripts (of which this file is a part) installed. Furthermore, the a symlink named "install-everthing"
+# has been created that points to the correct installer, which in turn has been edited to comment out those steps that
+# have already been performed.
+########################################################################################################################
+set -ex
+
+# We're running in Docker, so we need a consistent hostname. Docker normally chooses a random one, but RMC/Spock uses
+# the hostname to determine when directories are mounted across multiple operating systems. If the hostnames don't
+# match, then RMC/Spock will re-install all the software we worked so hard to have pre-installed.  It's not sufficient
+# to just set SPOCK_HOSTNAME because Tup will not pass it along to children.
+hostname container
+export PATH="$HOME/.spock/bin:$PATH"
+spock-ls
+
+# Under gitlab, our CWD is the ROSE source tree. The ROSE installer scripts expect to be invoked from the parent
+# directory with the ROSE source tree named "rose". Use a symlink to work around. Docker does everything in / instead of
+# $HOME.
+rose_src="$(pwd)"
+cd /
+rm -f rose
+ln -s "$rose_src" rose
+ls -la
+
+# Installer scripts should already be present and ready to go. The steps that have already been done in the image for
+# this docker container are commented out.  Extra non-public software can be mounted as a docker volume in /software.
+mkdir -p /software rose/artifacts
+ls -la /software
+./rose-installers/install-everything
+
+# Additional artifacts to save. These are in addition to what install-everything already put here.
+test -d /software/artifacts/. && rsync -ai /software/artifacts/ rose/artifacts || true
