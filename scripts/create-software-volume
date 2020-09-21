@@ -5,50 +5,47 @@ set -ex
 # ESTCP=
 # VXWORKS_ATTRLIB=
 
-########################################################################################################################
 
-# Robb's development machines
-if [ -d "$HOME/rose-wip/megachiropteran/." ]; then
-    MEGACHIROPTERAN="$(pwd)/megachiropteran.bundle"
-    git -C "$HOME/rose-wip/megachiropteran" bundle create "$MEGACHIROPTERAN" HEAD
-fi
-
-if [ -d "$HOME/estcp/software/." ]; then
-    ESTCP="$(pwd)/estcp-software.bundle"
-    git -C "$HOME/estcp/software" bundle create "$ESTCP" HEAD
-fi
-
-if [ -d "$HOME/GS-CAD/ROSE/Jaccel/vxworks_attributeLib/." ]; then
-    VXWORKS_ATTRLIB="$(pwd)/vxworks_attributeLib"
-    rsync -ai --delete --exclude="*~" "$HOME/GS-CAD/ROSE/Jaccel/vxworks_attributeLib/" "$VXWORKS_ATTRLIB"
-fi
-
-
-########################################################################################################################
-# Create a Dockerfile that creates the volume
 DOCKERFILE="Dockerfile.$$"
+trap "rm '$DOCKERFILE'" EXIT
 (
+    #-----------------------------
+    # Dockerfile header
+    #-----------------------------
     echo "# -*- shell-script -*-"
     echo "from ubuntu:20.04"
     echo "run : $(date +"%Y-%m-%d %H:%M:%S")"
     echo "run mkdir -p /software"
 
-    for f in "$MEGACHIROPTERAN" "$ESTCP" "$VXWORKS_ATTRLIB"; do
-	if [ -n "$f" ]; then
-	    echo "add ${f##*/} /software/${f##*/}"
-	fi
-    done
+    #-----------------------------
+    # Robb's development machines
+    #-----------------------------
+    if [ -d "$HOME/rose-wip/megachiropteran/." ]; then
+	git -C "$HOME/rose-wip/megachiropteran" bundle create "$(pwd)/megachiropteran.bundle" HEAD
+	echo "add megachiropteran.bundle /software/megachiropteran.bundle"
+    fi
 
+    if [ -d "$HOME/estcp/software/." ]; then
+	git -C "$HOME/estcp/software" bundle create "$(pwd)/estcp-software.bundle" HEAD
+	echo "add estcp-software.bundle /software/estcp-software.bundle"
+    fi
+
+    if [ -d "$HOME/GS-CAD/ROSE/Jaccel/vxworks_attributeLib/." ]; then
+	mkdir -p artifacts
+	rsync --archive --quiet --delete --exclude="*~" "$HOME/GS-CAD/ROSE/Jaccel/vxworks_attributeLib/" "artifacts/vxworks_attributeLib"
+	echo "add artifacts /software/artifacts"
+    fi
+
+    #-----------------------------
+    # Dockerfile footer
+    #-----------------------------
     echo "volume /software"
 ) >"$DOCKERFILE"
-trap "rm '$DOCKERFILE'" EXIT
-cat -n "$DOCKERFILE"
 
-########################################################################################################################
-# Run docker commands to create the volume
+# Run Docker commands to create the volume
+cat -n "$DOCKERFILE"
 image_name="populate-software-volume.image"
 volume_name=ouo-software
-
 docker volume rm "$volume_name" || true
 docker image build -f "$DOCKERFILE" -t "$image_name" .
 docker run --rm -it --mount "source=$volume_name,destination=/software" "$image_name" true
