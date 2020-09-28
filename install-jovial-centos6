@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################################################################
-# This script is able to install ROSE on a clean CentOS-6 machine, configuring ROSE for binary analysis
-# (--enable-languages=binaries) along with a number of software packages that increase the feature set of the binary
-# analysis.
+# This script is able to install ROSE on a clean CentOS-6 machine, configuring ROSE for Jovial, C, and C++ analysis
+# (--enable-languages=c,c++ and additional switches for Jovial) along with a number of prerequisite software packages
+# such as ATerm, Stratego, SDF2, and Java.
 #
 # Prerequisite steps:
 #
@@ -28,8 +28,14 @@
 #
 #  2. Run "sudo yum -y install git"
 #
-#  3. Optionally copy Megachiropteran and/or ESTCP source code into the "megachiropteran" and "estcp-software"
-#     directories. They will be built and installed if present.
+#  3. Manually copy non-public prerequisite software packages into /software with the names listed below. You can find
+#     these on the ROSE team's NFS server in the /usr/casc/overture/ROSE/opt/rhel7/x86_64/stratego directory (the OS and
+#     ISA components of this path don't mean anything).
+#
+#       strategoxt-0.17.1.tar.gz
+#       sdf2-bundle-2.4.1.tar.gz
+#       aterm-3.0.tar.gz
+#
 #
 #  4. Run "git clone https://github.com/matzke1/rose-installers"
 #
@@ -43,10 +49,11 @@ set -e
 arg0="${0##*/}"
 dir0="${0%/*}"
 
-. "${dir0}/impl/binaryanalysis-installation-support.sh"
+. "${dir0}/impl/jovialanalysis-installation-support.sh"
 export PATH="$HOME/.spock/bin:$PATH"
 
 # These instructions come from https://rosecompiler.atlassian.net/wiki/x/vwBhF
+[[ override ]]
 install-system-dependencies() {
     (
 	set -x
@@ -88,6 +95,7 @@ install-system-dependencies() {
 
 # Some systems require extra commands to be run in each shell.
 # These instructions come from https://rosecompiler.atlassian.net/wiki/x/vwBhF
+[[ override ]]
 run() {
     (
 	set -x
@@ -95,25 +103,16 @@ run() {
     )
 }
 
-choose-rose-dependencies() {
-    rm -rf rose/_build
-    mkdir rose/_build
-
-    compilers="$(run spock-ls -1 gnu-compilers |sort -r |head -1),default-c,default-c++"
-
-    (
-	set -x
-
-	# patchelf-0.10 doesn't compile here, but 0.9 does.
-	run spock-shell --with patchelf-0.9 --install true
-
-	# The system installed CMake is too old for yamlcpp and Z3, so we use one that RMC/Spock installs.
-	# jq cannot be built with such an old version of GNU autotools (errors during configuration)
-	# The postgresql library (pqxx) can't be built on such an old system (errors from the C++ compiler)
-	(cd rose/_build && BUILD=tup CMAKE=3.13 JQ=none PQXX=none run rmc init --project=binaries --batch ..)
-    )
-
-    cat rose/_build/.rmc-main.cfg
+[[ override ]]
+build-test-install-rose-garden() {
+    # Extra level of escaping needed for quotes and dollar signs due to multiple nesting of "run", "rmc", and "bash -c".
+    run rmc -C rose/_build bash -c '
+	cd ../../rose-garden/jovial-to-cpp
+	export PATH=\"\$HOME/rose-installed/latest/bin:\$PATH\"
+	make -j\$RMC_PARALLELISM
+        # No install target
+        cp -n src/translate \$HOME/rose-installed/latest/bin/.
+	'
 }
 
 ########################################################################################################################

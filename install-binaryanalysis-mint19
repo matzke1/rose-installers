@@ -57,5 +57,6 @@ configure-rose
 build-test-install-rose
 conditionally-install-megachiropteran
 conditionally-install-estcp
+conditionally-install-rose-garden
 build-binary-release
 compress-binary-release
