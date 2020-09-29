@@ -17,21 +17,21 @@ check-hardware-requirements() {
     # Available disk space, typically including /tmp. However, if /tmp is mounted elsewhere then that filesystem
     # should also be large.
     for dir in . "${TMPDIR:-/tmp}"; do
-	local free_disk_kb=$(df "$dir" |sed -n '2,$ p' |tr -s ' \t' '\t' |cut -f4)
-	if [ -n "$free_disk_kb" ]; then
-	    if [ $free_disk_kb -lt $min_disk_kb ]; then
-		echo "$arg0: filesystem containing \"$dir\" is too small" >&2
-		exit 1
-	    fi
-	fi
+        local free_disk_kb=$(df "$dir" |sed -n '2,$ p' |tr -s ' \t' '\t' |cut -f4)
+        if [ -n "$free_disk_kb" ]; then
+            if [ $free_disk_kb -lt $min_disk_kb ]; then
+                echo "$arg0: filesystem containing \"$dir\" is too small" >&2
+                exit 1
+            fi
+        fi
     done
 
     local total_ram_kb=$(free |sed -n '/^Mem:/p' |tr -s ' \t' '\t' |cut -f2)
     if [ -n "$total_ram_kb" ]; then
-	if [ $total_ram_kb -lt $min_ram_kb ]; then
-	    echo "$arg0: RAM size is too small" >&2
-	    exit 1
-	fi
+        if [ $total_ram_kb -lt $min_ram_kb ]; then
+            echo "$arg0: RAM size is too small" >&2
+            exit 1
+        fi
     fi
 }
 
@@ -47,8 +47,8 @@ install-system-dependencies() {
 # that are necessary are maintained at https://rosecompiler.atlassian.net/wiki/x/vwBhF
 run() {
     (
-	set -x
-	"$@"
+        set -x
+        "$@"
     )
 }
 
@@ -63,7 +63,7 @@ install-rmc-spock() {
 # Obtain the ROSE source code and places it in the "rose" directory, but only if that directory doesn't already exist.
 get-rose-source-code() {
     if [ ! -d rose/. ]; then
-	git clone -b develop https://github.com/rose-compiler/rose rose
+        git clone -b develop https://github.com/rose-compiler/rose rose
     fi
 }
 
@@ -115,43 +115,43 @@ build-test-install-rose() {
     # none). Therefore we need to also leave the old names in the file system. Certainly the rose-config.cfg has hard
     # coded paths that will be used when building additional tools.
     if [ -e rose/_build/installed/lib/rose-config.cfg ]; then
-	local dst="$HOME/rose-installed/$(date +%Y-%m-%d)/binrelease-$(date +%H%M%S)"
-	rm -rf "$dst" "$HOME/rose-installed/latest" "$HOME/rose-installed/latest-release"
-	mkdir -p "$dst"
-	mv rose/_build/installed/* "$dst"
-	rm -rf rose/_build/installed
-	(cd "$HOME/rose-installed" && ln -s "$dst" latest && ln -s "$dst" latest-release)
-	(cd rose/_build && ln -s "$dst" installed)
+        local dst="$HOME/rose-installed/$(date +%Y-%m-%d)/binrelease-$(date +%H%M%S)"
+        rm -rf "$dst" "$HOME/rose-installed/latest" "$HOME/rose-installed/latest-release"
+        mkdir -p "$dst"
+        mv rose/_build/installed/* "$dst"
+        rm -rf rose/_build/installed
+        (cd "$HOME/rose-installed" && ln -s "$dst" latest && ln -s "$dst" latest-release)
+        (cd rose/_build && ln -s "$dst" installed)
     fi
     
     # If we used a non-standard compiler that wouldn't be installed on the user's system, we should make sure to
     # distribute it as part of the binary release.
     local cxx_spec="$(run rmc -C rose/_build spock-using c++-compiler)"
     if ! (run spock-ls "$cxx_spec" |grep -q system-compiler); then
-	local cxx_vendor_uc="$(run rmc -C rose/_build c++ --spock-triplet |cut -d: -f1 |tr a-z A-Z)"
-	local cxx_root="$(run rmc -C rose/_build bash -c "echo \\\$${cxx_vendor_uc}_COMPILERS_ROOT")"
-	rsync -ai "$cxx_root/" "$HOME/rose-installed/latest/."
+        local cxx_vendor_uc="$(run rmc -C rose/_build c++ --spock-triplet |cut -d: -f1 |tr a-z A-Z)"
+        local cxx_root="$(run rmc -C rose/_build bash -c "echo \\\$${cxx_vendor_uc}_COMPILERS_ROOT")"
+        rsync -ai "$cxx_root/" "$HOME/rose-installed/latest/."
     fi
     
     # If this was a non-Tup build (i.e., Autotools or CMake) then we still have a bunch of work to do to install stuff
     # because ROSE's makefiles are incomplete.
     if [ -e rose/_build/installed/lib/rose-config.cfg ]; then
-	# ROSE Autotools and CMake builds fail to install the mkinstaller script, which is needed later in order to
-	# build a binary release from the installed copy of ROSE.
-	if [ ! -x "$HOME/rose-installed/latest/bin/mkinstaller" ]; then
-	    cp rose/scripts/mkinstaller "$HOME/rose-installed/latest/bin/."
-	fi
+        # ROSE Autotools and CMake builds fail to install the mkinstaller script, which is needed later in order to
+        # build a binary release from the installed copy of ROSE.
+        if [ ! -x "$HOME/rose-installed/latest/bin/mkinstaller" ]; then
+            cp rose/scripts/mkinstaller "$HOME/rose-installed/latest/bin/."
+        fi
 
-	# The rose-config.cfg file is missing almost all the shared library directories. Also, instead of being a colon-separated
-	# list of directory names, each directory must be preceded by "-R " and spaces instead of colons.
-	local rpaths="-R $(run rmc -C rose/_build bash -c 'echo \$ALL_LIBDIRS' |sed 's/:/ -R /g') -R $(pwd)/rose/_build/stratego"
-	(
-	    sed '/^ROSE_RPATHS/d' <"$HOME/rose-installed/latest/lib/rose-config.cfg"
-	    echo
-	    echo "# Corrected variables after autotools make install"
-	    echo "ROSE_RPATHS = $rpaths"
-	) >"$HOME/rose-installed/latest/lib/rose-config.cfg.new"
-	mv "$HOME/rose-installed/latest/lib/rose-config.cfg.new" "$HOME/rose-installed/latest/lib/rose-config.cfg"
+        # The rose-config.cfg file is missing almost all the shared library directories. Also, instead of being a colon-separated
+        # list of directory names, each directory must be preceded by "-R " and spaces instead of colons.
+        local rpaths="-R $(run rmc -C rose/_build bash -c 'echo \$ALL_LIBDIRS' |sed 's/:/ -R /g') -R $(pwd)/rose/_build/stratego"
+        (
+            sed '/^ROSE_RPATHS/d' <"$HOME/rose-installed/latest/lib/rose-config.cfg"
+            echo
+            echo "# Corrected variables after autotools make install"
+            echo "ROSE_RPATHS = $rpaths"
+        ) >"$HOME/rose-installed/latest/lib/rose-config.cfg.new"
+        mv "$HOME/rose-installed/latest/lib/rose-config.cfg.new" "$HOME/rose-installed/latest/lib/rose-config.cfg"
     fi
 }
 
@@ -178,11 +178,11 @@ build-binary-release() {
     [ -d empty-project/tup-scripts ] || (cd empty-project && git clone https://github.com/matzke1/tup-scripts)
 
     if [ -r "$HOME/rose-installed/latest/include/rose-installed-make.cfg" ]; then
-	# Tup builds
-	cp "$HOME/rose-installed/latest/include/rose-installed-make.cfg" empty-project/rose.cfg
+        # Tup builds
+        cp "$HOME/rose-installed/latest/include/rose-installed-make.cfg" empty-project/rose.cfg
     else
-	# Autotools and CMake builds
-	cp "$HOME/rose-installed/latest/lib/rose-config.cfg" empty-project/rose.cfg
+        # Autotools and CMake builds
+        cp "$HOME/rose-installed/latest/lib/rose-config.cfg" empty-project/rose.cfg
     fi
 
     cp empty-project/tup-scripts/post-install-script empty-project/.
@@ -199,17 +199,17 @@ compress-binary-release() {
     local md5sum=$(md5sum "$release_name.7z" |cut -d' ' -f1)
 
     (
-	echo
-	echo "Binary release created:"
-	echo "   name     = $release_name.7z"
-	echo "   password = $password"
-	echo "   md5sum   = $md5sum"
+        echo
+        echo "Binary release created:"
+        echo "   name     = $release_name.7z"
+        echo "   password = $password"
+        echo "   md5sum   = $md5sum"
     ) |tee release-info.txt
 
     # If there's a "rose/artifacts" directory, move the release into that directory
     local artifacts="rose/artifacts"
     if [ -d "$artifacts/." ]; then
-	mv "$release_name.7z" release-info.txt "$artifacts"
+        mv "$release_name.7z" release-info.txt "$artifacts"
     fi
 }
 

@@ -35,40 +35,40 @@ export PATH="$HOME/.spock/bin:$PATH"
 install-system-dependencies() {
     ### WARNING: yum commands don't exit with non-zero status if they fail!!!!!!
     (
-	set -x
-	sudo yum -y update
+        set -x
+        sudo yum -y update
  
-	sudo yum -y install wget tar cmake java-1.8.0-openjdk-devel python-devel graphviz gcc-c++ flex bison \
+        sudo yum -y install wget tar cmake java-1.8.0-openjdk-devel python-devel graphviz gcc-c++ flex bison \
              bzip2 zlib-devel libtool libtool-ltdl-devel byacc libgcrypt-devel xz \
              fuse fuse-devel passwd fontconfig mesa-libGLU git pcre-devel patch glibc-static libstdc++-static \
              libstdc++-devel.i686 ncurses-devel.i686 sudo postgresql-devel ghostscript
     )
 
     while ! which scl; do
-	# Often fails the first time it runs, so just try a few times
-	sleep 5
-	(set -x; sudo yum -y install centos-release-scl devtoolset-7)
+        # Often fails the first time it runs, so just try a few times
+        sleep 5
+        (set -x; sudo yum -y install centos-release-scl devtoolset-7)
     done
 
     (
-	set -x
+        set -x
 
-	# If you plan to build with Tup
-	sudo chmod 4755 /bin/fusermount
+        # If you plan to build with Tup
+        sudo chmod 4755 /bin/fusermount
 
-	# SQLite's build system needs TCL
-	sudo yum -y install tcl-devel
+        # SQLite's build system needs TCL
+        sudo yum -y install tcl-devel
  
-	# The following lines are needed for 7z if you're building binary releases of ROSE software
-	wget https://www.mirrorservice.org/sites/dl.fedoraproject.org/pub/epel/7/x86_64/Packages/p/p7zip-16.02-10.el7.x86_64.rpm
-	wget https://www.mirrorservice.org/sites/dl.fedoraproject.org/pub/epel/7/x86_64/Packages/p/p7zip-plugins-16.02-10.el7.x86_64.rpm
-	sudo rpm -U --quiet p7zip-16.02-10.el7.x86_64.rpm
-	sudo rpm -U --quiet p7zip-plugins-16.02-10.el7.x86_64.rpm
-	rm p7zip-16.02-10.el7.x86_64.rpm p7zip-plugins-16.02-10.el7.x86_64.rpm
+        # The following lines are needed for 7z if you're building binary releases of ROSE software
+        wget https://www.mirrorservice.org/sites/dl.fedoraproject.org/pub/epel/7/x86_64/Packages/p/p7zip-16.02-10.el7.x86_64.rpm
+        wget https://www.mirrorservice.org/sites/dl.fedoraproject.org/pub/epel/7/x86_64/Packages/p/p7zip-plugins-16.02-10.el7.x86_64.rpm
+        sudo rpm -U --quiet p7zip-16.02-10.el7.x86_64.rpm
+        sudo rpm -U --quiet p7zip-plugins-16.02-10.el7.x86_64.rpm
+        rm p7zip-16.02-10.el7.x86_64.rpm p7zip-plugins-16.02-10.el7.x86_64.rpm
 
-	# Additional utilities that are needed for building ROSE or dependencies. "file" is needed when moving artifacts to
-	# the installation directories, and "rsync" is needed to copy extra files into artifact directories.
-	sudo yum -y install file rsync
+        # Additional utilities that are needed for building ROSE or dependencies. "file" is needed when moving artifacts to
+        # the installation directories, and "rsync" is needed to copy extra files into artifact directories.
+        sudo yum -y install file rsync
     )
 }
 
@@ -76,8 +76,8 @@ install-system-dependencies() {
 # These instructions come from https://rosecompiler.atlassian.net/wiki/x/vwBhF
 run() {
     (
-	set -x
-	scl enable devtoolset-7 -- "$@"
+        set -x
+        scl enable devtoolset-7 -- "$@"
     )
 }
 

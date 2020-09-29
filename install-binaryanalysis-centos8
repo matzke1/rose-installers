@@ -34,30 +34,30 @@ export PATH="$HOME/.spock/bin:$PATH"
 # These instructions come from https://rosecompiler.atlassian.net/wiki/x/vwBhF
 install-system-dependencies() {
     (
-	set -x
-	### WARNING: yum commands don't exit with non-zero status if they fail!!!!!!
-	sudo yum -y update
-	sudo yum -y install wget tar cmake java-1.8.0-openjdk-devel graphviz gcc-c++ flex bison \
+        set -x
+        ### WARNING: yum commands don't exit with non-zero status if they fail!!!!!!
+        sudo yum -y update
+        sudo yum -y install wget tar cmake java-1.8.0-openjdk-devel graphviz gcc-c++ flex bison \
              bzip2 zlib-devel libtool libtool-ltdl-devel byacc libgcrypt-devel xz \
              fuse fuse-devel passwd fontconfig mesa-libGLU pcre-devel patch \
              postgresql-devel ghostscript make
 
-	# Static libraries (needed by some ROSE dependencies)
-	sudo dnf -y install langpacks-en glibc-all-langpacks
-	sudo dnf -y install 'dnf-command(config-manager)'
-	sudo dnf config-manager --enable PowerTools
-	sudo yum -y install glibc-static libstdc++-static
+        # Static libraries (needed by some ROSE dependencies)
+        sudo dnf -y install langpacks-en glibc-all-langpacks
+        sudo dnf -y install 'dnf-command(config-manager)'
+        sudo dnf config-manager --enable PowerTools
+        sudo yum -y install glibc-static libstdc++-static
 
-	# The following lines are needed for 7z if you're building binary releases of ROSE software
-	sudo dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
-	sudo rpm -ql epel-release
-	sudo dnf repolist -v
-	sudo dnf -y install p7zip p7zip-plugins
+        # The following lines are needed for 7z if you're building binary releases of ROSE software
+        sudo dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+        sudo rpm -ql epel-release
+        sudo dnf repolist -v
+        sudo dnf -y install p7zip p7zip-plugins
 
-	# Additional utilities that are needed for building ROSE or dependencies. "texinfo" and "help2man" are needed to
-	# install bison. "file" is needed when moving artifacts to the installation directories. "tcl-devel" is needed to
-	# install SQLite.
-	sudo dnf -y install diffutils file help2man rsync texinfo tcl-devel
+        # Additional utilities that are needed for building ROSE or dependencies. "texinfo" and "help2man" are needed to
+        # install bison. "file" is needed when moving artifacts to the installation directories. "tcl-devel" is needed to
+        # install SQLite.
+        sudo dnf -y install diffutils file help2man rsync texinfo tcl-devel
     )
 }
 

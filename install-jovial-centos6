@@ -14,17 +14,17 @@
 #     logged in the first time on this type of machine:
 #
 #       # Extra commands for AWS machines with broken automtic growing of root filesystem
-#      	sudo fdisk /dev/xvdb  (then enter "n RET p RET 1 RET RET RET w RET")
-#      	sudo mke2fs /dev/xvdb1
-#      	sudo mount /dev/xvdb1 /mnt
-#      	sudo chown centos:centos /mnt
-#      	mkdir /mnt/tmp
-#      	export TMPDIR=/mnt/tmp
-#      	mkdir /mnt/.spock
-#      	ln -s /mnt/.spock ~/.spock
-#      	mkdir /mnt/rose-installed
-#      	ln -s /mnt/rose-installed ~/rose-installed
-#      	cd /mnt
+#       sudo fdisk /dev/xvdb  (then enter "n RET p RET 1 RET RET RET w RET")
+#       sudo mke2fs /dev/xvdb1
+#       sudo mount /dev/xvdb1 /mnt
+#       sudo chown centos:centos /mnt
+#       mkdir /mnt/tmp
+#       export TMPDIR=/mnt/tmp
+#       mkdir /mnt/.spock
+#       ln -s /mnt/.spock ~/.spock
+#       mkdir /mnt/rose-installed
+#       ln -s /mnt/rose-installed ~/rose-installed
+#       cd /mnt
 #
 #  2. Run "sudo yum -y install git"
 #
@@ -56,40 +56,40 @@ export PATH="$HOME/.spock/bin:$PATH"
 [[ override ]]
 install-system-dependencies() {
     (
-	set -x
-	sudo yum -y update
-	sudo yum -y install wget tar cmake java-1.8.0-openjdk-devel python-devel graphviz gcc-c++ flex bison \
-	     bzip2 zlib-devel libtool libtool-ltdl-devel byacc libgcrypt-devel xz \
-	     fuse fuse-devel passwd fontconfig mesa-libGLU git pcre-devel patch glibc-static libstdc++-static \
-	     libstdc++-devel.i686 ncurses-devel.i686 sudo postgresql-devel ghostscript
+        set -x
+        sudo yum -y update
+        sudo yum -y install wget tar cmake java-1.8.0-openjdk-devel python-devel graphviz gcc-c++ flex bison \
+             bzip2 zlib-devel libtool libtool-ltdl-devel byacc libgcrypt-devel xz \
+             fuse fuse-devel passwd fontconfig mesa-libGLU git pcre-devel patch glibc-static libstdc++-static \
+             libstdc++-devel.i686 ncurses-devel.i686 sudo postgresql-devel ghostscript
     )
 
     while ! which scl; do
-	# Often fails the first time it runs, so just try a few times
-	sleep 5
-	(set -x; sudo yum -y install centos-release-scl devtoolset-7)
+        # Often fails the first time it runs, so just try a few times
+        sleep 5
+        (set -x; sudo yum -y install centos-release-scl devtoolset-7)
     done
 
     (
-	set -x
+        set -x
 
-	# The Z3 installation needs Python-3 for its build system
-	sudo yum -y install rh-python36
+        # The Z3 installation needs Python-3 for its build system
+        sudo yum -y install rh-python36
 
-	# The SQLite installation needs tcl for its build system
-	sudo yum -y install tcl-devel
+        # The SQLite installation needs tcl for its build system
+        sudo yum -y install tcl-devel
 
-	# Tup needs to be able to mount filesystems with FUSE
-	sudo chmod 4755 /bin/fusermount
+        # Tup needs to be able to mount filesystems with FUSE
+        sudo chmod 4755 /bin/fusermount
  
-	# The following lines are needed for 7z if you're building binary releases of ROSE software
-	wget https://www.mirrorservice.org/sites/dl.fedoraproject.org/pub/epel/6/x86_64/Packages/p/p7zip-16.02-10.el6.x86_64.rpm
-	wget https://www.mirrorservice.org/sites/dl.fedoraproject.org/pub/epel/6/x86_64/Packages/p/p7zip-plugins-16.02-10.el6.x86_64.rpm
+        # The following lines are needed for 7z if you're building binary releases of ROSE software
+        wget https://www.mirrorservice.org/sites/dl.fedoraproject.org/pub/epel/6/x86_64/Packages/p/p7zip-16.02-10.el6.x86_64.rpm
+        wget https://www.mirrorservice.org/sites/dl.fedoraproject.org/pub/epel/6/x86_64/Packages/p/p7zip-plugins-16.02-10.el6.x86_64.rpm
 
-	# These commands fail if the package is already installed. They can fail for other reasons, but we can't distinguish.
-	sudo rpm -U --quiet p7zip-16.02-10.el6.x86_64.rpm || true
-	sudo rpm -U --quiet p7zip-plugins-16.02-10.el6.x86_64.rpm || true
-	rm -f p7zip-16.02-10.el6.x86_64.rpm p7zip-plugins-16.02-10.el6.x86_64.rpm
+        # These commands fail if the package is already installed. They can fail for other reasons, but we can't distinguish.
+        sudo rpm -U --quiet p7zip-16.02-10.el6.x86_64.rpm || true
+        sudo rpm -U --quiet p7zip-plugins-16.02-10.el6.x86_64.rpm || true
+        rm -f p7zip-16.02-10.el6.x86_64.rpm p7zip-plugins-16.02-10.el6.x86_64.rpm
     )
 }
 
@@ -98,8 +98,8 @@ install-system-dependencies() {
 [[ override ]]
 run() {
     (
-	set -x
-	scl enable devtoolset-7 rh-python36 -- "$@"
+        set -x
+        scl enable devtoolset-7 rh-python36 -- "$@"
     )
 }
 
@@ -107,12 +107,12 @@ run() {
 build-test-install-rose-garden() {
     # Extra level of escaping needed for quotes and dollar signs due to multiple nesting of "run", "rmc", and "bash -c".
     run rmc -C rose/_build bash -c '
-	cd ../../rose-garden/jovial-to-cpp
-	export PATH=\"\$HOME/rose-installed/latest/bin:\$PATH\"
-	make -j\$RMC_PARALLELISM
+        cd ../../rose-garden/jovial-to-cpp
+        export PATH=\"\$HOME/rose-installed/latest/bin:\$PATH\"
+        make -j\$RMC_PARALLELISM
         # No install target
         cp -n src/translate \$HOME/rose-installed/latest/bin/.
-	'
+        '
 }
 
 ########################################################################################################################
