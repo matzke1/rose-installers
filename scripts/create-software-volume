@@ -24,22 +24,22 @@ trap "rm '$DOCKERFILE'" EXIT
     # Latest versions of non-public software repositories
     if [ -d "$HOME/rose-wip/megachiropteran/." ]; then
         git -C "$HOME/rose-wip/megachiropteran" bundle create "$(pwd)/megachiropteran.bundle" HEAD
-        echo "add megachiropteran.bundle /software/megachiropteran.bundle"
+        echo "copy megachiropteran.bundle /software/megachiropteran.bundle"
     fi
     if [ -d "$HOME/estcp/software/." ]; then
         git -C "$HOME/estcp/software" bundle create "$(pwd)/estcp-software.bundle" HEAD
-        echo "add estcp-software.bundle /software/estcp-software.bundle"
+        echo "copy estcp-software.bundle /software/estcp-software.bundle"
     fi
     if [ -d "$HOME/rose-wip/rose-garden/." ]; then
         git -C "$HOME/rose-wip/rose-garden" bundle create "$(pwd)/rose-garden.bundle" HEAD
-        echo "add rose-garden.bundle /software/rose-garden.bundle"
+        echo "copy rose-garden.bundle /software/rose-garden.bundle"
     fi
     
     # A version of the vxworks attribute library distributed by Jim Leek
     if [ -d "$HOME/GS-CAD/ROSE/Jaccel/vxworks_attributeLib/." ]; then
         mkdir -p artifacts
         rsync --archive --quiet --delete --exclude="*~" "$HOME/GS-CAD/ROSE/Jaccel/vxworks_attributeLib/" "artifacts/vxworks_attributeLib"
-        echo "add artifacts /software/artifacts"
+        echo "copy artifacts /software/artifacts"
     fi
 
     # Source files needed for Jovial analysis support, maintained by Craig Rasmussen.
@@ -50,7 +50,7 @@ trap "rm '$DOCKERFILE'" EXIT
     do
         if [ -r "$file" ]; then
             cp "$file" .
-            echo "add ${file##*/} /software/${file##*/}"
+            echo "copy ${file##*/} /software/${file##*/}"
         fi
     done
 
