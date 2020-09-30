@@ -133,6 +133,11 @@ build-test-install-rose() {
         rsync -ai "$cxx_root/" "$HOME/rose-installed/latest/."
     fi
     
+    # The stratego installation needs to be copied to ROSE's installation root.
+    if [ -d rose/_build/stratego ]; then
+	rsync -ai rose/_build/stratego/ "$HOME/rose-installed/latest/."
+    fi
+
     # If this was a non-Tup build (i.e., Autotools or CMake) then we still have a bunch of work to do to install stuff
     # because ROSE's makefiles are incomplete.
     if [ -e rose/_build/installed/lib/rose-config.cfg ]; then
@@ -144,7 +149,10 @@ build-test-install-rose() {
 
         # The rose-config.cfg file is missing almost all the shared library directories. Also, instead of being a colon-separated
         # list of directory names, each directory must be preceded by "-R " and spaces instead of colons.
-        local rpaths="-R $(run rmc -C rose/_build bash -c 'echo \$ALL_LIBDIRS' |sed 's/:/ -R /g') -R $(pwd)/rose/_build/stratego"
+        local rpaths="-R $(run rmc -C rose/_build bash -c 'echo \$ALL_LIBDIRS' |sed 's/:/ -R /g')"
+	if [ -d "rose/_build/stratego/." ]; then
+	   rpaths="$rpaths -R $(pwd)/rose/_build/stratego"
+	fi
         (
             sed '/^ROSE_RPATHS/d' <"$HOME/rose-installed/latest/lib/rose-config.cfg"
             echo
