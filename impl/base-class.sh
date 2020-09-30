@@ -138,6 +138,11 @@ build-test-install-rose() {
 	rsync -ai rose/_build/stratego/ "$HOME/rose-installed/latest/."
     fi
 
+    # If Tristan's Jovial tests are present, then install them too.
+    if [ -f /software/tests.tar ]; then
+	(cd "$HOME/rose-installed/latest/." && tar xf /software/tests.tar)
+    fi
+
     # If this was a non-Tup build (i.e., Autotools or CMake) then we still have a bunch of work to do to install stuff
     # because ROSE's makefiles are incomplete.
     if [ -e rose/_build/installed/lib/rose-config.cfg ]; then

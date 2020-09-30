@@ -42,11 +42,12 @@ trap "rm '$DOCKERFILE'" EXIT
         echo "copy artifacts /software/artifacts"
     fi
 
-    # Source files needed for Jovial analysis support, maintained by Craig Rasmussen.
+    # Source files needed for Jovial analysis support, maintained by Craig Rasmussen and/or Tristan Vanderbruggen
     for file in \
         "$HOME/GS-CAD/ROSE/Jovial/aterm-3.0.tar.gz" \
         "$HOME/GS-CAD/ROSE/Jovial/sdf2-bundle-2.4.1.tar.gz" \
-        "$HOME/GS-CAD/ROSE/Jovial/strategoxt-0.17.1.tar.gz"
+        "$HOME/GS-CAD/ROSE/Jovial/strategoxt-0.17.1.tar.gz" \
+	"$HOME/GS-CAD/ROSE/Jovial/tests.tar"
     do
         if [ -r "$file" ]; then
             cp "$file" .
