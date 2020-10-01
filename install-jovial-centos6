@@ -107,11 +107,10 @@ run() {
 build-test-install-rose-garden() {
     # Extra level of escaping needed for quotes and dollar signs due to multiple nesting of "run", "rmc", and "bash -c".
     run rmc -C rose/_build bash -c '
-        cd ../../rose-garden/jovial-to-cpp
         export PATH=\"\$HOME/rose-installed/latest/bin:\$PATH\"
+        cd ../../rose-garden/jovial-to-cpp/src
         make -j\$RMC_PARALLELISM
-        # No install target
-        cp -n src/translate \$HOME/rose-installed/latest/bin/.
+	make install
         '
 }
 
