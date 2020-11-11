@@ -34,12 +34,20 @@ trap "rm '$DOCKERFILE'" EXIT
         git -C "$HOME/rose-wip/rose-garden" bundle create "$(pwd)/rose-garden.bundle" HEAD
         echo "copy rose-garden.bundle /software/rose-garden.bundle"
     fi
+
+    # Extra source files to distribute with the binary release
+    if [ -d "$HOME/rose-wip/rose-demos/." ]; then
+	mkdir -p artifacts
+	git -C "$HOME/rose-wip/rose-demos" bundle create "artifacts/rose-demos.bundle" HEAD
+	if [ "$HOME/rose-wip/rose-demos/README.md" ]; then
+	    cp "$HOME/rose-wip/rose-demos/README.md" "artifacts/rose-demos-README.md"
+	fi
+    fi
     
     # A version of the vxworks attribute library distributed by Jim Leek
     if [ -d "$HOME/GS-CAD/ROSE/Jaccel/vxworks_attributeLib/." ]; then
         mkdir -p artifacts
         rsync --archive --quiet --delete --exclude="*~" "$HOME/GS-CAD/ROSE/Jaccel/vxworks_attributeLib/" "artifacts/vxworks_attributeLib"
-        echo "copy artifacts /software/artifacts"
     fi
 
     # Source files needed for Jovial analysis support, maintained by Craig Rasmussen and/or Tristan Vanderbruggen
@@ -55,6 +63,10 @@ trap "rm '$DOCKERFILE'" EXIT
         fi
     done
 
+    if [ -d artifacts ]; then
+	echo "copy artifacts /software/artifacts"
+    fi
+    
     #-----------------------------
     # Dockerfile footer
     #-----------------------------
