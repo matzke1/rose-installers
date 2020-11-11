@@ -69,7 +69,8 @@ run rm -rf rose
 # Clean up the changes we made to the rose-installers scripts, but then comment out the steps we've already done
 run git -C rose-installers reset --hard
 run git -C rose-installers clean -dfxq
-run sed -i~ '/^check-hardware-requirements /,/^install-rmc-spock/ s/^/#/' ./rose-installers/install-binaryanalysis-ubuntu2004
+run sed -i~ '/^check-hardware-requirements/,/^install-rmc-spock/ s/^/#/' ./rose-installers/install-binaryanalysis-ubuntu2004
+run sed -i~ '/^check-hardware-requirements/,/^install-rmc-spock/ s/^/#/' ./rose-installers/install-fullrelease-ubuntu2004
 
 ########################################################################################################################
 # The default run command

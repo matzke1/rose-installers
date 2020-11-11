@@ -32,7 +32,11 @@ ls -la
 # this docker container are commented out.  Extra non-public software can be mounted as a docker volume in /software.
 mkdir -p /software rose/artifacts
 ls -la /software
-./rose-installers/install-everything
+if [ -n "$1" ]; then
+    ./rose-installers/$1
+else
+    ./rose-installers/install-everything
+fi
 
 # Additional artifacts to save. These are in addition to what install-everything already put here.
 test -d /software/artifacts/. && rsync -ai /software/artifacts/ rose/artifacts || true

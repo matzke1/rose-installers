@@ -35,10 +35,10 @@ trap "rm '$DOCKERFILE'" EXIT
         echo "copy rose-garden.bundle /software/rose-garden.bundle"
     fi
 
-    # Extra source files to distribute with the binary release
+    # Extra source files to distribute with the binary release, thus put in "artifacts"
     if [ -d "$HOME/rose-wip/rose-demos/." ]; then
 	mkdir -p artifacts
-	git -C "$HOME/rose-wip/rose-demos" bundle create "artifacts/rose-demos.bundle" HEAD
+	git -C "$HOME/rose-wip/rose-demos" bundle create "$(pwd)/artifacts/rose-demos.bundle" HEAD
 	if [ "$HOME/rose-wip/rose-demos/README.md" ]; then
 	    cp "$HOME/rose-wip/rose-demos/README.md" "artifacts/rose-demos-README.md"
 	fi

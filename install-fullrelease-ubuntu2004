@@ -1,0 +1,116 @@
+#!/bin/bash
+########################################################################################################################
+# This script is able to install ROSE on a clean Ubuntu-20.04 machine, configuring ROSE for Jovial, C, C++, and binary
+# analysis (--enable-languages=binaries,c,c++ and additional switches for Jovial) along with a number of prerequisite
+# software packages such as ATerm, Stratego, SDF2, and Java.
+#
+# Prerequisite steps:
+#
+#  1. Create a new Ubuntu-20.04 machine.
+#
+#  2. Log in as a normal (non-root) user
+#
+#  3. Run "sudo yum -y install git"
+#
+#  4. Optionally copy Megachiropteran and/or ESTCP source code into the "megachiropteran" and "estcp-software"
+#     directories. They will be built and installed if present.
+#
+#  5. Manually copy non-public prerequisite software packages into /software with the names listed below. You can find
+#     these on the ROSE team's NFS server in the /usr/casc/overture/ROSE/opt/rhel7/x86_64/stratego directory (the OS and
+#     ISA components of this path don't mean anything).
+#
+#       strategoxt-0.17.1.tar.gz
+#       sdf2-bundle-2.4.1.tar.gz
+#       aterm-3.0.tar.gz
+#
+#  6. Run "git clone https://github.com/matzke1/rose-installers"
+#
+#  7. Run "./rose-installers/install-release-ubuntu2004"
+#
+# If this script fails part way through, it's often possible to make adjustments to the system and then re-run this
+# script after commenting out the steps at the end that have already been completed.
+#
+########################################################################################################################
+set -e
+arg0="${0##*/}"
+dir0="${0%/*}"
+
+. "${dir0}/impl/full-release.sh"
+export PATH="$HOME/.spock/bin:$PATH"
+
+# These instructions come from https://rosecompiler.atlassian.net/wiki/x/vwBhF
+install-system-dependencies() {
+    sudo apt-get -y update
+    sudo apt-get -y install git wget build-essential g++ gfortran libtool automake flex bison \
+        graphviz-dev cmake libpqxx-dev ghostscript perl-doc groff libgcrypt20-dev \
+        libfcgi-dev libfuse-dev patchelf gcc-multilib g++-multilib gfortran-multilib \
+        fuse bsdmainutils libxapian-dev p7zip-full rsync
+
+    # If building SQLite from source code
+    sudo apt-get -y install fossil tclsh
+
+    # If building ROSE graphical user interfaces that use Qt
+    sudo apt-get -y install qt5-default '^libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev \
+        libxrender-dev libxi-dev libfontconfig1-dev libatspi2.0-dev libdbus-1-dev libxkbcommon-dev
+    sudo strip --remove-section=.note.ABI-tag /usr/lib/x86_64-linux-gnu/libQt5Core.so.5
+}
+
+# Decide what software dependencies should be used when compiling ROSE.
+[[ override ]]
+choose-rose-dependencies() {
+    rm -rf rose/_build
+    mkdir rose/_build
+    
+    (
+        set -x
+
+        # For some reason, Jovial analysis is enabled unlike any other analysis. Instead of adding "jovial" to the list
+        # of supported languages, there's an entirely separate switch for it. Unfortunately, RMC/Spock doesn't know
+        # about this nonstandard way of enabling a language, so we need to use the catch-all "rmc_other". Also, beware
+        # of the mixed-style name containing both hyphens and underscores.
+        #
+        (cd rose/_build && run env LANGUAGES="binaries,c,c++" rmc init --batch ..)
+        local stratego_root="$(pwd)/rose/_build/stratego"
+        echo "rmc_other '--enable-experimental_jovial_frontend --with-aterm=$stratego_root --with-stratego=$stratego_root'" >>rose/_build/.rmc-main.cfg
+    )
+
+    cat rose/_build/.rmc-main.cfg
+}
+
+[[ override ]]
+build-test-install-rose-garden() {
+    # Extra level of escaping needed for quotes and dollar signs due to multiple nesting of "run", "rmc", and "bash -c".
+
+    # Jovial
+    run rmc -C rose/_build bash -c '
+        export PATH=\"\$HOME/rose-installed/latest/bin:\$PATH\"
+        cd ../../rose-garden/jovial-to-cpp/src
+        make -j\$RMC_PARALLELISM
+	make install
+        '
+
+    # attributeLib (which has no "make install" target)
+    run rmc -C rose/_build bash -c '
+        export PATH=\"\$HOME/rose-installed/latest/bin:\$PATH\"
+        cd ../../rose-garden/attributeLib/src
+        ROSE_HOME=\$HOME/rose-installed/latest BOOST_HOME=\$BOOST_ROOT make
+        cp -p attributeLibIngest attributeLibMatch attributeLibWithSource \$HOME/rose-installed/latest/bin/.
+        '
+}
+
+########################################################################################################################
+
+check-hardware-requirements
+install-system-dependencies
+install-rmc-spock
+get-rose-source-code
+choose-rose-dependencies
+install-rose-dependencies
+create-automake-files
+configure-rose
+build-test-install-rose
+conditionally-install-megachiropteran
+conditionally-install-estcp
+conditionally-install-rose-garden
+build-binary-release
+compress-binary-release

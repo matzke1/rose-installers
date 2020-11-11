@@ -1,0 +1,108 @@
+#!/bin/bash
+########################################################################################################################
+# This script is able to install ROSE on a clean CentOS-8 machine, configuring ROSE for Jovial, C, C++, and binary
+# analysis (--enable-languages=binaries,c,c++ and additional switches for Jovial) along with a number of prerequisite
+# software packages such as ATerm, Stratego, SDF2, and Java.
+#
+# Prerequisite steps:
+#
+#  1. Create a new CentOS-8 machine.
+#
+#  2. Log in as a normal (non-root) user
+#
+#  3. Run "sudo yum -y install git"
+#
+#  4. Optionally copy Megachiropteran and/or ESTCP source code into the "megachiropteran" and "estcp-software"
+#     directories. They will be built and installed if present.
+#
+#  5. Manually copy non-public prerequisite software packages into /software with the names listed below. You can find
+#     these on the ROSE team's NFS server in the /usr/casc/overture/ROSE/opt/rhel7/x86_64/stratego directory (the OS and
+#     ISA components of this path don't mean anything).
+#
+#       strategoxt-0.17.1.tar.gz
+#       sdf2-bundle-2.4.1.tar.gz
+#       aterm-3.0.tar.gz
+#
+#  6. Run "git clone https://github.com/matzke1/rose-installers"
+#
+#  7. Run "./rose-installers/install-release-centos8"
+#
+# If this script fails part way through, it's often possible to make adjustments to the system and then re-run this
+# script after commenting out the steps at the end that have already been completed.
+#
+########################################################################################################################
+set -e
+arg0="${0##*/}"
+dir0="${0%/*}"
+
+. "${dir0}/impl/full-release.sh"
+export PATH="$HOME/.spock/bin:$PATH"
+
+# These instructions come from https://rosecompiler.atlassian.net/wiki/x/vwBhF
+[[ override ]]
+install-system-dependencies() {
+    (
+        set -x
+        ### WARNING: yum commands don't exit with non-zero status if they fail!!!!!!
+        sudo yum -y update
+        sudo yum -y install wget tar cmake java-1.8.0-openjdk-devel graphviz gcc-c++ flex bison \
+             bzip2 zlib-devel libtool libtool-ltdl-devel byacc libgcrypt-devel xz \
+             fuse fuse-devel passwd fontconfig mesa-libGLU pcre-devel patch \
+             postgresql-devel ghostscript make
+
+        # Static libraries (needed by some ROSE dependencies)
+        sudo dnf -y install langpacks-en glibc-all-langpacks
+        sudo dnf -y install 'dnf-command(config-manager)'
+        sudo dnf config-manager --enable PowerTools
+        sudo yum -y install glibc-static libstdc++-static
+
+        # The following lines are needed for 7z if you're building binary releases of ROSE software
+        sudo dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+        sudo rpm -ql epel-release
+        sudo dnf repolist -v
+        sudo dnf -y install p7zip p7zip-plugins
+
+        # Additional utilities that are needed for building ROSE or dependencies. "texinfo" and "help2man" are needed to
+        # install bison. "file" is needed when moving artifacts to the installation directories. "tcl-devel" is needed to
+        # install SQLite.
+        sudo dnf -y install diffutils file help2man rsync texinfo tcl-devel
+    )
+}
+
+[[ override ]]
+build-test-install-rose-garden() {
+    # Extra level of escaping needed for quotes and dollar signs due to multiple nesting of "run", "rmc", and "bash -c".
+
+    # Jovial
+    run rmc -C rose/_build bash -c '
+        export PATH=\"\$HOME/rose-installed/latest/bin:\$PATH\"
+        cd ../../rose-garden/jovial-to-cpp/src
+        make -j\$RMC_PARALLELISM
+	make install
+        '
+
+    # attributeLib (which has no "make install" target)
+    run rmc -C rose/_build bash -c '
+        export PATH=\"\$HOME/rose-installed/latest/bin:\$PATH\"
+        cd ../../rose-garden/attributeLib/src
+        ROSE_HOME=\$HOME/rose-installed/latest BOOST_HOME=\$BOOST_ROOT make
+        cp -p attributeLibIngest attributeLibMatch attributeLibWithSource \$HOME/rose-installed/latest/bin/.
+        '
+}
+
+########################################################################################################################
+
+check-hardware-requirements
+install-system-dependencies
+install-rmc-spock
+get-rose-source-code
+choose-rose-dependencies
+install-rose-dependencies
+create-automake-files
+configure-rose
+build-test-install-rose
+conditionally-install-megachiropteran
+conditionally-install-estcp
+conditionally-install-rose-garden
+build-binary-release
+compress-binary-release
