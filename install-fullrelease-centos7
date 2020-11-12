@@ -92,6 +92,28 @@ run() {
     )
 }
 
+[[ override ]]
+choose-rose-dependencies() {
+    rm -rf rose/_build
+    mkdir rose/_build
+
+    (
+        set -x
+
+	# Boost 1.73.0 causes link errors when buliding librose.so, so we use 1.72.0 instead.
+
+        # For some reason, Jovial analysis is enabled unlike any other analysis. Instead of adding "jovial" to the list
+        # of supported languages, there's an entirely separate switch for it. Unfortunately, RMC/Spock doesn't know
+        # about this nonstandard way of enabling a language, so we need to use the catch-all "rmc_other". Also, beware
+        # of the mixed-style name containing both hyphens and underscores.
+        (cd rose/_build && run env LANGUAGES="binaries,c,c++" BOOST=1.72.0 rmc init --project=binaries --batch ..)
+        local stratego_root="$(pwd)/rose/_build/stratego"
+        echo "rmc_other '--enable-experimental_jovial_frontend --with-aterm=$stratego_root --with-stratego=$stratego_root'" >>rose/_build/.rmc-main.cfg
+    )
+
+    cat rose/_build/.rmc-main.cfg
+}
+
 ########################################################################################################################
 
 check-hardware-requirements
