@@ -51,7 +51,8 @@ install-system-dependencies() {
 choose-rose-dependencies() {
     rm -rf rose/_build
     mkdir rose/_build
-    (cd rose/_build && BUILD=tup QT=5.12 run rmc init --project=binaries --batch ..)
+    #(cd rose/_build && BUILD=tup QT=5.12 run rmc init --project=binaries --batch ..)
+    (cd rose/_build && BUILD=tup QT=none run rmc init --project=binaries --batch ..)
     cat rose/_build/.rmc-main.cfg
 }
 
