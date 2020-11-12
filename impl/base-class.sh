@@ -85,9 +85,16 @@ choose-rose-dependencies() {
     cat rose/_build/.rmc-main.cfg
 }
 
+# Install dependencies for Jovial analysis within ROSE.  This is called by install-rose-dependencies if Jovial analysis
+# is needed.
+install-rose-jovial-dependencies() {
+    : none
+}
+
 # Install all the software needed to build ROSE. The software was chosen by choose-rose-dependencies.
 install-rose-dependencies() {
     (cd rose/_build && run rmc --install=yes true)
+    install-rose-jovial-dependencies
 }
 
 # Run commands related to GNU Autotools, such as libtoolize, aclocal, autoheader, autoconf, and automake. This builds the

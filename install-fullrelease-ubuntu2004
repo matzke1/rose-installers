@@ -55,39 +55,24 @@ install-system-dependencies() {
     sudo strip --remove-section=.note.ABI-tag /usr/lib/x86_64-linux-gnu/libQt5Core.so.5
 }
 
-# Decide what software dependencies should be used when compiling ROSE.
 [[ override ]]
 choose-rose-dependencies() {
     rm -rf rose/_build
     mkdir rose/_build
-    
-    (
-        set -x
-
-        # For some reason, Jovial analysis is enabled unlike any other analysis. Instead of adding "jovial" to the list
-        # of supported languages, there's an entirely separate switch for it. Unfortunately, RMC/Spock doesn't know
-        # about this nonstandard way of enabling a language, so we need to use the catch-all "rmc_other". Also, beware
-        # of the mixed-style name containing both hyphens and underscores.
-        #
-        (cd rose/_build && run env LANGUAGES="binaries,c,c++" rmc init --batch ..)
-        local stratego_root="$(pwd)/rose/_build/stratego"
-        echo "rmc_other '--enable-experimental_jovial_frontend --with-aterm=$stratego_root --with-stratego=$stratego_root'" >>rose/_build/.rmc-main.cfg
-    )
-
+    # Jovial is not supported on Ubuntu-20.04 because the Stratego build fails, so don't enable it
+    (cd rose/_build && run env LANGUAGES="binaries,c,c++" rmc init --batch ..)
     cat rose/_build/.rmc-main.cfg
 }
 
 [[ override ]]
-build-test-install-rose-garden() {
-    # Extra level of escaping needed for quotes and dollar signs due to multiple nesting of "run", "rmc", and "bash -c".
+install-rose-jovial-dependencies() {
+    # Disabled on Ubuntu 20.04 because the Stratego build fails.
+    : none
+}
 
-    # Jovial
-    run rmc -C rose/_build bash -c '
-        export PATH=\"\$HOME/rose-installed/latest/bin:\$PATH\"
-        cd ../../rose-garden/jovial-to-cpp/src
-        make -j\$RMC_PARALLELISM
-	make install
-        '
+[[ override ]]
+build-test-install-rose-garden() {
+    # Jovial not supported here
 
     # attributeLib (which has no "make install" target)
     run rmc -C rose/_build bash -c '

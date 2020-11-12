@@ -39,7 +39,7 @@ dir0="${0%/*}"
 export PATH="$HOME/.spock/bin:$PATH"
 
 # These instructions come from https://rosecompiler.atlassian.net/wiki/x/vwBhF
-[[override]]
+[[ override ]]
 install-system-dependencies() {
     sudo apt-get -y update
     sudo apt-get -y upgrade
@@ -57,16 +57,23 @@ install-system-dependencies() {
 }
 
 [[ override ]]
-build-test-install-rose-garden() {
-    # Extra level of escaping needed for quotes and dollar signs due to multiple nesting of "run", "rmc", and "bash -c".
+choose-rose-dependencies() {
+    rm -rf rose/_build
+    mkdir rose/_build
+    # Jovial is not supported on Ubuntu-20.04 because the Stratego build fails, so don't enable it
+    (cd rose/_build && run env LANGUAGES="binaries,c,c++" rmc init --project=binaries --batch ..)
+    cat rose/_build/.rmc-main.cfg
+}
 
-    # Jovial
-    run rmc -C rose/_build bash -c '
-        export PATH=\"\$HOME/rose-installed/latest/bin:\$PATH\"
-        cd ../../rose-garden/jovial-to-cpp/src
-        make -j\$RMC_PARALLELISM
-	make install
-        '
+[[ override ]]
+install-rose-jovial-dependencies() {
+    # Disabled on Ubuntu 20.04 because the Stratego build fails.
+    : none
+}
+
+[[ override ]]
+build-test-install-rose-garden() {
+    # Jovial not supported here
 
     # attributeLib (which has no "make install" target)
     run rmc -C rose/_build bash -c '

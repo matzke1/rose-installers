@@ -27,14 +27,12 @@ choose-rose-dependencies() {
     cat rose/_build/.rmc-main.cfg
 }
 
-# Install all the software needed to build ROSE. The software was chosen by choose-rose-dependencies.
-[[ override ]]
-install-rose-dependencies() {
-    # All the standard stuff based on choose-rose-dependencies above.
-    (cd rose/_build && run rmc --install=yes true)
-
-    # We also need to build some software that's only available to ROSE team members. We assume that the following files
-    # are present and unpack to similarly named directories. You may need to mount /software in the Docker container.
+# Install dependencies for Jovial analysis within ROSE.  This is called by install-rose-dependencies if Jovial analysis
+# is needed.
+[[ overrride ]]
+install-rose-jovial-dependencies() {
+    # This requires some software that's only available to ROSE team members. We assume that the following files are
+    # present and unpack to similarly named directories. You may need to mount /software in the Docker container.
     #
     #   /software/aterm-3.0.tar.gz
     #   /software/sdf2-bundle-2.4.1.tar.gz
@@ -47,14 +45,14 @@ install-rose-dependencies() {
     # ROSE team's private Red Hat specific environment configuration scripts, but rather RMC/Spock. Craig's instructions
     # are that these steps are run inside a ROSE build environment, therefore we need to give all those commands to
     # RMC/Spock to run. Futhermore, RMC/Spock must be run inside the CentOS 6/Red Hat 6 "scl" command in order to have
-    # additional more modern prerequisites available.  All this nesting causes an extra level of escaping to be needed
-    # for double quotes and dollar signs. The current working directory, $RG_BLD, is the top of the ROSE build tree.
+    # additional more modern prerequisites available. The current working directory, $RG_BLD, is the top of the ROSE
+    # build tree.
     #
     # Note: I'm assuming that the "make" commands can run in parallel, although Craigs instructions are to build
     # serially. (Update: parallel build failed with "/bin/sh: line 3: /rose/_build/strategoxt-0.17.1/xtc/src/xtc: No
     # such file or directory". This might be unrelated to a parallel build, but I'm disabling parallelism temporarily to
     # see if it fixes it.)
-    cat >build-jovial-dependencies <<'EOF'
+    cat >rose/_build/build-jovial-dependencies <<'EOF'
         set -ex
         export STRATEGO_HOME=$RG_BLD/stratego
         export CFLAGS=-DAT_64BIT
@@ -101,6 +99,27 @@ install-rose-dependencies() {
         rm -rf aterm-3.0 ._aterm-3.0 sdf2-bundle-2.4.1 strategoxt-0.17.1
 EOF
     run rmc -C rose/_build bash build-jovial-dependencies
+}
+
+[[ override ]]
+build-test-install-rose-garden() {
+    # Extra level of escaping needed for quotes and dollar signs due to multiple nesting of "run", "rmc", and "bash -c".
+
+    # Jovial
+    run rmc -C rose/_build bash -c '
+        export PATH=\"\$HOME/rose-installed/latest/bin:\$PATH\"
+        cd ../../rose-garden/jovial-to-cpp/src
+        make -j\$RMC_PARALLELISM
+	make install
+        '
+
+    # attributeLib (which has no "make install" target)
+    run rmc -C rose/_build bash -c '
+        export PATH=\"\$HOME/rose-installed/latest/bin:\$PATH\"
+        cd ../../rose-garden/attributeLib/src
+        ROSE_HOME=\$HOME/rose-installed/latest BOOST_HOME=\$BOOST_ROOT make
+        cp -p attributeLibIngest attributeLibMatch attributeLibWithSource \$HOME/rose-installed/latest/bin/.
+        '
 }
 
 [[ override ]]
