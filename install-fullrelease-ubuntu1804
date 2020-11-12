@@ -61,7 +61,8 @@ choose-rose-dependencies() {
     rm -rf rose/_build
     mkdir rose/_build
     # Jovial is not supported on Ubuntu-20.04 because the Stratego build fails, so don't enable it
-    (cd rose/_build && run env LANGUAGES="binaries,c,c++" rmc init --project=binaries --batch ..)
+    # Autotools has link error when building librose.la with boost-1.73.0
+    (cd rose/_build && run env LANGUAGES="binaries,c,c++" BOOST=1.72.0 rmc init --project=binaries --batch ..)
     cat rose/_build/.rmc-main.cfg
 }
 
