@@ -131,27 +131,6 @@ choose-rose-dependencies() {
     cat rose/_build/.rmc-main.cfg
 }
 
-[[ override ]]
-build-test-install-rose-garden() {
-    # Extra level of escaping needed for quotes and dollar signs due to multiple nesting of "run", "rmc", and "bash -c".
-
-    # Jovial
-    run rmc -C rose/_build bash -c '
-        export PATH=\"\$HOME/rose-installed/latest/bin:\$PATH\"
-        cd ../../rose-garden/jovial-to-cpp/src
-        make -j\$RMC_PARALLELISM
-	make install
-        '
-
-    # attributeLib (which has no "make install" target)
-    run rmc -C rose/_build bash -c '
-        export PATH=\"\$HOME/rose-installed/latest/bin:\$PATH\"
-        cd ../../rose-garden/attributeLib/src
-        ROSE_HOME=\$HOME/rose-installed/latest BOOST_HOME=\$BOOST_ROOT make
-        cp -p attributeLibIngest attributeLibMatch attributeLibWithSource \$HOME/rose-installed/latest/bin/.
-        '
-}
-
 ########################################################################################################################
 
 check-hardware-requirements

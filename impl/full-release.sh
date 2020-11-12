@@ -103,23 +103,23 @@ EOF
 
 [[ override ]]
 build-test-install-rose-garden() {
-    # Extra level of escaping needed for quotes and dollar signs due to multiple nesting of "run", "rmc", and "bash -c".
-
     # Jovial
-    run rmc -C rose/_build bash -c '
-        export PATH=\"\$HOME/rose-installed/latest/bin:\$PATH\"
+    cat >rose/_build/build-rosegarden-jovial <<'EOF'
+        export PATH="$HOME/rose-installed/latest/bin:$PATH"
         cd ../../rose-garden/jovial-to-cpp/src
-        make -j\$RMC_PARALLELISM
+        make -j$RMC_PARALLELISM
 	make install
-        '
+EOF
+    run rmc -C rose/_build bash build-rosegarden-jovial
 
     # attributeLib (which has no "make install" target)
-    run rmc -C rose/_build bash -c '
-        export PATH=\"\$HOME/rose-installed/latest/bin:\$PATH\"
+    cat >rose/_build/build-rosegarden-attributelib <<'EOF'
+        export PATH="$HOME/rose-installed/latest/bin:$PATH"
         cd ../../rose-garden/attributeLib/src
-        ROSE_HOME=\$HOME/rose-installed/latest BOOST_HOME=\$BOOST_ROOT make
-        cp -p attributeLibIngest attributeLibMatch attributeLibWithSource \$HOME/rose-installed/latest/bin/.
-        '
+        ROSE_HOME="$HOME/rose-installed/latest" BOOST_HOME="$BOOST_ROOT" make
+        cp -p attributeLibIngest attributeLibMatch attributeLibWithSource "$HOME/rose-installed/latest/bin/."
+EOF
+    run rmc -C rose/_build bash build-rosegarden-attributelib
 }
 
 [[ override ]]
