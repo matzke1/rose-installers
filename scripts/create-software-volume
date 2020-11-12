@@ -22,40 +22,45 @@ trap "rm '$DOCKERFILE'" EXIT
     #-----------------------------
 
     # Latest versions of non-public software repositories
-    if [ -d "$HOME/rose-wip/megachiropteran/." ]; then
-        git -C "$HOME/rose-wip/megachiropteran" bundle create "$(pwd)/megachiropteran.bundle" HEAD
+    EXTRA="$HOME/GS-CAD/ROSE/ouo-software"
+    if [ -d "$EXTRA/megachiropteran/." ]; then
+        git -C "$EXTRA/megachiropteran/." bundle create "$(pwd)/megachiropteran.bundle" HEAD
         echo "copy megachiropteran.bundle /software/megachiropteran.bundle"
     fi
-    if [ -d "$HOME/estcp/software/." ]; then
-        git -C "$HOME/estcp/software" bundle create "$(pwd)/estcp-software.bundle" HEAD
+    if [ -d "$EXTRA/estcp-software/." ]; then
+        git -C "$EXTRA/estcp-software/." bundle create "$(pwd)/estcp-software.bundle" HEAD
         echo "copy estcp-software.bundle /software/estcp-software.bundle"
     fi
-    if [ -d "$HOME/rose-wip/rose-garden/." ]; then
-        git -C "$HOME/rose-wip/rose-garden" bundle create "$(pwd)/rose-garden.bundle" HEAD
+    if [ -d "$EXTRA/rose-garden/." ]; then
+        git -C "$EXTRA/rose-garden/." bundle create "$(pwd)/rose-garden.bundle" HEAD
         echo "copy rose-garden.bundle /software/rose-garden.bundle"
     fi
 
     # Extra source files to distribute with the binary release, thus put in "artifacts"
-    if [ -d "$HOME/rose-wip/rose-demos/." ]; then
-	mkdir -p artifacts
-	git -C "$HOME/rose-wip/rose-demos" bundle create "$(pwd)/artifacts/rose-demos.bundle" HEAD
-	if [ "$HOME/rose-wip/rose-demos/README.md" ]; then
-	    cp "$HOME/rose-wip/rose-demos/README.md" "artifacts/rose-demos-README.md"
-	fi
-    fi
-    
-    # A version of the vxworks attribute library distributed by Jim Leek
-    if [ -d "$HOME/GS-CAD/ROSE/Jaccel/vxworks_attributeLib/." ]; then
+    if [ -d "$EXTRA/rose-demos/." ]; then
         mkdir -p artifacts
-        rsync --archive --quiet --delete --exclude="*~" "$HOME/GS-CAD/ROSE/Jaccel/vxworks_attributeLib/" "artifacts/vxworks_attributeLib"
+        git -C "$EXTRA/rose-demos/." bundle create "$(pwd)/artifacts/rose-demos.bundle" HEAD
+        if [ -r "$EXTRA/rose-demos/README.md" ]; then
+            cp "$EXTRA/rose-demos/README.md" "artifacts/rose-demos-README.md"
+        fi
+    fi
+
+    # A version of the vxworks attribute library distributed by Jim Leek
+    if [ -d "$EXTRA/vxworks_attributeLib/." ]; then
+        mkdir -p artifacts
+        rsync --archive --quiet --delete --exclude="*~" "$EXTRA/vxworks_attributeLib/./" "artifacts/vxworks_attributeLib"
+    fi
+    if [ -r "$EXTRA/attributeLibDemo.tar.gz" ]; then
+        mkdir -p artifacts
+        cp "$EXTRA/attributeLibDemo.tar.gz" "artifacts/."
     fi
 
     # Source files needed for Jovial analysis support, maintained by Craig Rasmussen and/or Tristan Vanderbruggen
     for file in \
-        "$HOME/GS-CAD/ROSE/Jovial/aterm-3.0.tar.gz" \
-        "$HOME/GS-CAD/ROSE/Jovial/sdf2-bundle-2.4.1.tar.gz" \
-        "$HOME/GS-CAD/ROSE/Jovial/strategoxt-0.17.1.tar.gz" \
-	"$HOME/GS-CAD/ROSE/Jovial/tests.tar"
+        "$EXTRA/aterm-3.0.tar.gz" \
+        "$EXTRA/sdf2-bundle-2.4.1.tar.gz" \
+        "$EXTRA/strategoxt-0.17.1.tar.gz" \
+        "$EXTRA/tests.tar"
     do
         if [ -r "$file" ]; then
             cp "$file" .
@@ -64,9 +69,9 @@ trap "rm '$DOCKERFILE'" EXIT
     done
 
     if [ -d artifacts ]; then
-	echo "copy artifacts /software/artifacts"
+        echo "copy artifacts /software/artifacts"
     fi
-    
+
     #-----------------------------
     # Dockerfile footer
     #-----------------------------
