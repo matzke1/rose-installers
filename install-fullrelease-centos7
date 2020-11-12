@@ -88,29 +88,8 @@ install-system-dependencies() {
 run() {
     (
         set -x
-        scl enable devtoolset-7 "$@"
+        scl enable devtoolset-7 -- "$@"
     )
-}
-
-[[ override ]]
-build-test-install-rose-garden() {
-    # Extra level of escaping needed for quotes and dollar signs due to multiple nesting of "run", "rmc", and "bash -c".
-
-    # Jovial
-    run rmc -C rose/_build bash -c '
-        export PATH=\"\$HOME/rose-installed/latest/bin:\$PATH\"
-        cd ../../rose-garden/jovial-to-cpp/src
-        make -j\$RMC_PARALLELISM
-	make install
-        '
-
-    # attributeLib (which has no "make install" target)
-    run rmc -C rose/_build bash -c '
-        export PATH=\"\$HOME/rose-installed/latest/bin:\$PATH\"
-        cd ../../rose-garden/attributeLib/src
-        ROSE_HOME=\$HOME/rose-installed/latest BOOST_HOME=\$BOOST_ROOT make
-        cp -p attributeLibIngest attributeLibMatch attributeLibWithSource \$HOME/rose-installed/latest/bin/.
-        '
 }
 
 ########################################################################################################################
