@@ -19,7 +19,7 @@ choose-rose-dependencies() {
         # of supported languages, there's an entirely separate switch for it. Unfortunately, RMC/Spock doesn't know
         # about this nonstandard way of enabling a language, so we need to use the catch-all "rmc_other". Also, beware
         # of the mixed-style name containing both hyphens and underscores.
-        (cd rose/_build && run env LANGUAGES="binaries,c,c++" rmc init --batch ..)
+        (cd rose/_build && run env LANGUAGES="binaries,c,c++" rmc init --project=binaries --batch ..)
         local stratego_root="$(pwd)/rose/_build/stratego"
         echo "rmc_other '--enable-experimental_jovial_frontend --with-aterm=$stratego_root --with-stratego=$stratego_root'" >>rose/_build/.rmc-main.cfg
     )
