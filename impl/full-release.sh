@@ -101,36 +101,3 @@ EOF
     run rmc -C rose/_build bash build-jovial-dependencies
 }
 
-[[ override ]]
-build-test-install-rose-garden() {
-    # Jovial
-    cat >rose/_build/build-rosegarden-jovial <<'EOF'
-        export PATH="$HOME/rose-installed/latest/bin:$PATH"
-        cd ../../rose-garden/jovial-to-cpp/src
-        make -j$RMC_PARALLELISM
-	make install
-EOF
-    run rmc -C rose/_build bash build-rosegarden-jovial
-
-    # attributeLib (which has no "make install" target)
-    cat >rose/_build/build-rosegarden-attributelib <<'EOF'
-        export PATH="$HOME/rose-installed/latest/bin:$PATH"
-        cd ../../rose-garden/attributeLib/src
-        ROSE_HOME="$HOME/rose-installed/latest" BOOST_HOME="$BOOST_ROOT" make
-        cp -p attributeLibIngest attributeLibMatch attributeLibWithSource "$HOME/rose-installed/latest/bin/."
-EOF
-    run rmc -C rose/_build bash build-rosegarden-attributelib
-}
-
-[[ override ]]
-conditionally-install-rose-garden() {
-    if [ -d rose-garden/. ]; then
-        build-test-install-rose-garden
-    elif [ -e /software/rose-garden.bundle ]; then
-        git clone /software/rose-garden.bundle rose-garden
-        build-test-install-rose-garden
-        rm -rf rose-garden
-    elif [ -d /software/rose-garden/. ]; then
-        (cd /software && build-test-install-rose-garden)
-    fi
-}

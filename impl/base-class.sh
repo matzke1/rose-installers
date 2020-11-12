@@ -175,19 +175,51 @@ build-test-install-rose() {
     fi
 }
 
+
 # Build, test, and install the Megachiropteran tools.
 build-test-install-megachiropteran() {
-    : void
+    # [ROSE-2593] We need to temporarily disable the bat-conc tool since we configured ROSE without any database
+    # support and therefore no concolic testing support.
+    sed -i 's/^\(run .*bat-conc\)/#\1/' megachiropteran/Tupfile
+
+    run spock-shell -C megachiropteran --with tup,patchelf --install ./configure latest install
 }
 
 # Build, test, and install the ESTCP tools.
 build-test-install-estcp() {
-    : void
+    # [ROSE-2594] The sample sqlite "firmware" doesn't compile on this system, so exclude it from the build.
+    mv estcp-software/tests/sqlite-3.22.0/Tupfile{,.bak} || true
+    mv estcp-software/tests/sqlite-3.23.1/Tupfile{,.bak} || true
+
+    run spock-shell -C estcp-software --with tup,patchelf --install ./configure latest install
+}
+
+# Build, test, install ROSE Garden Jovial (called by build-test-install-rose-garden)
+build-test-install-rose-garden-jovial() {
+    cat >rose/_build/build-rosegarden-jovial <<'EOF'
+        export PATH="$HOME/rose-installed/latest/bin:$PATH"
+        cd ../../rose-garden/jovial-to-cpp/src
+        make -j$RMC_PARALLELISM
+	make install
+EOF
+    run rmc -C rose/_build bash build-rosegarden-jovial
+}
+
+# Build, test, install ROSE Garden attributeLib (called by build-test-install-rose-garden)
+build-test-install-rose-garden-attributeLib() {
+    run make -C rose-garden/attributeLib/src -f Makefile.robb install
 }
 
 # Build, test, and install the ROSE Garden tools
 build-test-install-rose-garden() {
-    : void
+    if [ -r "$HOME/rose-installed/latest/include/rose-installed-make.cfg" ]; then
+	cp "$HOME/rose-installed/latest/include/rose-installed-make.cfg" rose-garden/rose.cfg
+    elif [ -r "$HOME/rose-installed/latest/lib/rose-config.cfg" ]; then
+	cp "$HOME/rose-installed/latest/lib/rose-config.cfg" rose-garden/rose.cfg
+    fi
+
+    build-test-install-rose-garden-jovial
+    build-test-install-rose-garden-attributeLib
 }
 
 # Create a binary release of everything that's been installed, plus any additional libraries and headers that would be
@@ -238,13 +270,37 @@ compress-binary-release() {
 ########################################################################################################################
 
 conditionally-install-megachiropteran() {
-    : void
+    if [ -d megachiropteran/. ]; then
+        build-test-install-megachiropteran
+    elif [ -e /software/megachiropteran.bundle ]; then
+        git clone /software/megachiropteran.bundle megachiropteran
+        build-test-install-megachiropteran
+        rm -rf megachiropteran
+    elif [ -d /software/megachiropteran/. ]; then
+        (cd /software && build-test-install-megachiropteran)
+    fi
 }
 
 conditionally-install-estcp() {
-    : void
+    if [ -d estcp-software/. ]; then
+        build-test-install-estcp
+    elif [ -e /software/estcp-software.bundle ]; then
+        git clone /software/estcp-software.bundle estcp-software
+        build-test-install-estcp
+        rm -rf estcp-software
+    elif [ -d /software/estcp-software/. ]; then
+        (cd /software && build-test-install-estcp)
+    fi
 }
 
 conditionally-install-rose-garden() {
-    : void
+    if [ -d rose-garden/. ]; then
+        build-test-install-rose-garden
+    elif [ -e /software/rose-garden.bundle ]; then
+        git clone /software/rose-garden.bundle rose-garden
+        build-test-install-rose-garden
+        rm -rf rose-garden
+    elif [ -d /software/rose-garden/. ]; then
+        (cd /software && build-test-install-rose-garden)
+    fi
 }

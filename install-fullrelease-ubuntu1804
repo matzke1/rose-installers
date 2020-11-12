@@ -69,21 +69,13 @@ choose-rose-dependencies() {
 [[ override ]]
 install-rose-jovial-dependencies() {
     # Disabled on Ubuntu 20.04 because the Stratego build fails.
-    : none
+    : jovial is disabled
 }
 
+# Jovial analysis is not supported when ROSE is configured with only binary analysis support
 [[ override ]]
-build-test-install-rose-garden() {
-    # Jovial not supported here
-
-    # attributeLib (which has no "make install" target)
-    cat >rose/_build/build-rosegarden-attributelib <<'EOF'
-        export PATH="$HOME/rose-installed/latest/bin:$PATH"
-        cd ../../rose-garden/attributeLib/src
-        ROSE_HOME="$HOME/rose-installed/latest" BOOST_HOME="$BOOST_ROOT" make
-        cp -p attributeLibIngest attributeLibMatch attributeLibWithSource "$HOME/rose-installed/latest/bin/."
-EOF
-    run rmc -C rose/_build bash build-rosegarden-attributelib
+build-test-install-rose-garden-jovial() {
+    : jovial is disabled
 }
 
 ########################################################################################################################
