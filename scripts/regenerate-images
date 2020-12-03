@@ -57,6 +57,7 @@ for f in "${dockerfiles[@]}"; do
             # to avoid using a cached version of the intermediate image. Such lines will be replaced with something
             # unique.
             sed 's/\(^[ \t]*run[ \t]\+:\)[ \t].*/\1 '"$timestamp/" <"$f" >"$dockerfile"
+	    cat -n "$dockerfile"
 
             (
                 set -x

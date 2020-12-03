@@ -46,7 +46,7 @@ install-system-dependencies() {
     sudo apt-get -y install git wget build-essential g++ gfortran libtool automake flex bison \
         graphviz-dev cmake libpqxx-dev ghostscript perl-doc groff libgcrypt20-dev \
         libfcgi-dev libfuse-dev patchelf gcc-multilib g++-multilib gfortran-multilib \
-        fuse bsdmainutils locales language-pack-en-base jq rsync libxapian-dev p7zip-full
+        fuse bsdmainutils locales language-pack-en-base jq rsync libxapian-dev p7zip-full time
 
     # If building SQLite from source code
     sudo apt-get -y install fossil tclsh

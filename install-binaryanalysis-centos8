@@ -40,7 +40,7 @@ install-system-dependencies() {
         sudo yum -y install wget tar cmake java-1.8.0-openjdk-devel graphviz gcc-c++ flex bison \
              bzip2 zlib-devel libtool libtool-ltdl-devel byacc libgcrypt-devel xz \
              fuse fuse-devel passwd fontconfig mesa-libGLU pcre-devel patch \
-             postgresql-devel ghostscript make
+             postgresql-devel ghostscript make time
 
         # Static libraries (needed by some ROSE dependencies)
         sudo dnf -y install langpacks-en glibc-all-langpacks
