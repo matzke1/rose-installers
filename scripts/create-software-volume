@@ -21,7 +21,7 @@ trap "rm '$DOCKERFILE'" EXIT
     # Robb's development machines
     #-----------------------------
 
-    # Latest versions of non-public software repositories
+    # Latest versions of non-public software repositories, not distributed
     EXTRA="$HOME/GS-CAD/ROSE/ouo-software"
     if [ -d "$EXTRA/megachiropteran/." ]; then
         git -C "$EXTRA/megachiropteran/." bundle create "$(pwd)/megachiropteran.bundle" HEAD
@@ -36,6 +36,12 @@ trap "rm '$DOCKERFILE'" EXIT
         echo "copy rose-garden.bundle /software/rose-garden.bundle"
     fi
 
+    # Juliet binary test suites used to test some tools before release, but the tests themselves are not released.
+    if [ -d "$EXTRA/juliet/." ]; then
+	tar chf - -C "$EXTRA" juliet |gzip -9 >juliet.tar.gz
+	echo "copy juliet.tar.gz /software/juliet.tar.gz"
+    fi
+
     # Extra source files to distribute with the binary release, thus put in "artifacts"
     if [ -d "$EXTRA/rose-demos/." ]; then
         mkdir -p artifacts
@@ -46,6 +52,7 @@ trap "rm '$DOCKERFILE'" EXIT
     fi
 
     # A version of the vxworks attribute library distributed by Jim Leek
+    # These are intended to be part of the ROSE binary release
     if [ -d "$EXTRA/vxworks_attributeLib/." ]; then
         mkdir -p artifacts
         rsync --archive --quiet --delete --exclude="*~" "$EXTRA/vxworks_attributeLib/./" "artifacts/vxworks_attributeLib"

@@ -183,6 +183,9 @@ build-test-install-megachiropteran() {
     sed -i 's/^\(run .*bat-conc\)/#\1/' megachiropteran/Tupfile
 
     run spock-shell -C megachiropteran --with tup,patchelf --install ./configure latest install
+
+    # Optional Juliet test suite tests
+    (cd megachiropteran && PATH="$HOME/rose-installed/latest/bin:$PATH" ./maybe-run-juliet-tests /software/juliet.tar.gz)
 }
 
 # Build, test, and install the ESTCP tools.
