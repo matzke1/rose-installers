@@ -54,7 +54,7 @@ check-hardware-requirements 50000000
 install-system-dependencies
 install-rmc-spock
 get-rose-source-code
-choose-rose-dependencies
+TUP=0.7.9 COMPILER=gnu-gnu++17-7.5.0 choose-rose-dependencies
 install-rose-dependencies
 create-automake-files
 configure-rose
